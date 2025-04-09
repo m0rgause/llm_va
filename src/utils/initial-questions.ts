@@ -1,35 +1,38 @@
 export const INITIAL_QUESTIONS = [
   {
-    content: "What is the capital of France?",
+    content: "Jelaskan tentang Mercubuana University.",
   },
   {
-    content: 'Who wrote "To Kill a Mockingbird"?',
+    content: "Program apa saja yang ditawarkan oleh universitas?",
   },
   {
-    content: "What is the boiling point of water in Celsius?",
+    content: "Bagaimana cara mendaftar untuk masuk?",
   },
   {
-    content: "How many planets are there in our solar system?",
+    content: "Berapa biaya kuliah dan opsi pembayarannya?",
   },
   {
-    content: "What year did the Titanic sink?",
+    content: "Apakah ada beasiswa atau bantuan keuangan yang tersedia?",
   },
   {
-    content: "Who painted the Mona Lisa?",
+    content: "Apa saja pilihan akomodasi untuk mahasiswa?",
   },
   {
-    content: "What is the square root of 144?",
+    content: "Kapan batas waktu pendaftaran?",
   },
   {
-    content: "Who is the current President of the United States?",
+    content: "Bagaimana cara menghubungi kantor penerimaan mahasiswa?",
   },
   {
-    content: "What is the tallest mountain in the world?",
+    content: "Apa saja persyaratan untuk mahasiswa internasional?",
   },
   {
-    content: "What is the chemical symbol for gold?",
+    content: "Apakah universitas menawarkan kursus online?",
   },
   {
-    content: "Who discovered penicillin?",
+    content: "Kegiatan ekstrakurikuler apa saja yang tersedia di kampus?",
+  },
+  {
+    content: "Di mana saya bisa menemukan kalender akademik?",
   },
 ];

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
+import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { PageLayout } from "@/components/page-layout";
+import SessionWrapper from "@/components/session-wrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,12 +18,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={`antialiased tracking-tight ${inter.className}`}>
-        <ThemeProvider attribute="class" defaultTheme="dark">
-          <PageLayout>{children}</PageLayout>
-          <Toaster />
-        </ThemeProvider>
+    <html lang="en" suppressHydrationWarning={true}>
+      <body className={inter.className}>
+        <SessionWrapper>
+          <ThemeProvider attribute="class" defaultTheme="dark">
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </SessionWrapper>
       </body>
     </html>
   );

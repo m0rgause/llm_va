@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { GearIcon } from "@radix-ui/react-icons";
+import { GearIcon, ExitIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
@@ -28,11 +28,24 @@ import UsernameForm from "./username-form";
 import EditUsernameForm from "./edit-username-form";
 import PullModel from "./pull-model";
 import useChatStore from "@/app/hooks/useChatStore";
+import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 export default function UserSettings() {
   const [open, setOpen] = useState(false);
 
-  const userName = useChatStore((state) => state.userName);
+  const { data: session, status } = useSession();
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center w-full h-full">
+        <Skeleton className="w-10 h-10 rounded-full" />
+        <Skeleton className="w-32 h-4 rounded-full ml-2" />
+      </div>
+    );
+  }
+
+  const userName = session?.user.nama || "AI";
 
   return (
     <DropdownMenu>
@@ -59,9 +72,6 @@ export default function UserSettings() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-48 p-2">
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-          <PullModel />
-        </DropdownMenuItem>
         <Dialog>
           <DialogTrigger className="w-full">
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
@@ -77,6 +87,18 @@ export default function UserSettings() {
               <EditUsernameForm setOpen={setOpen} />
             </DialogHeader>
           </DialogContent>
+          {/* logout */}
+          <DropdownMenuItem className="w-full">
+            <div
+              className="flex w-full gap-2 p-1 items-center cursor-pointer hover:bg-accent"
+              onClick={() => {
+                signOut();
+              }}
+            >
+              <ExitIcon className="w-4 h-4" />
+              Logout
+            </div>
+          </DropdownMenuItem>
         </Dialog>
         <Dialog></Dialog>
       </DropdownMenuContent>

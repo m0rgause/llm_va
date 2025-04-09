@@ -57,7 +57,6 @@ export default function ChatTopbar({
     })();
   }, []);
 
-
   const handleModelChange = (model: string) => {
     setSelectedModel(model);
     setOpen(false);
@@ -78,7 +77,7 @@ export default function ChatTopbar({
             chatId={chatId || ""}
             isCollapsed={false}
             isMobile={false}
-            messages={messages}
+            // messages={messages}
             closeSidebar={handleCloseSidebar}
           />
         </SheetContent>

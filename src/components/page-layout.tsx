@@ -1,9 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ResizablePanel, ResizablePanelGroup } from "./ui/resizable";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "./ui/resizable";
 import { cn } from "@/lib/utils";
 import { Sidebar } from "./sidebar";
+import { HamburgerMenuIcon } from "@radix-ui/react-icons";
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { usePathname } from "next/navigation";
 
 export function PageLayout({
   children,
@@ -12,13 +19,17 @@ export function PageLayout({
   children: React.ReactNode;
   className?: string;
 }) {
+  const pathname = usePathname();
+  console.log("pathname", pathname);
+
   const defaultLayout = [30, 160];
   const defaultCollapsed = false;
   const navCollapsedSize = 10;
-  const path = "semester";
+  const path = pathname;
 
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [isMobile, setIsMobile] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   useEffect(() => {
     const checkScreenWidth = () => {
@@ -37,8 +48,12 @@ export function PageLayout({
     };
   }, []);
 
+  const handleCloseSidebar = () => {
+    setSheetOpen(false);
+  };
+
   return (
-    <main className="flex h-[calc(100dvh)] flex-col items-center">
+    <main className="h-screen items-stretch">
       <ResizablePanelGroup
         direction="horizontal"
         onLayout={(sizes: number[]) => {
@@ -79,8 +94,26 @@ export function PageLayout({
             chatId={path}
           />
         </ResizablePanel>
-        <ResizablePanel className="overflow-hidden" minSize={0}>
-          <div className={cn("h-full overflow-y-auto", className)}>
+        <ResizableHandle className={cn("hidden md:flex")} withHandle />
+        <ResizablePanel
+          defaultSize={defaultLayout[1]}
+          className="overflow-hidden"
+          minSize={0}
+        >
+          <div className={cn("h-full w-full overflow-y-auto p-6", className)}>
+            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+              <SheetTrigger>
+                <HamburgerMenuIcon className="lg:hidden w-5 h-5" />
+              </SheetTrigger>
+              <SheetContent side="left">
+                <Sidebar
+                  chatId={""}
+                  isCollapsed={false}
+                  isMobile={false}
+                  closeSidebar={handleCloseSidebar}
+                />
+              </SheetContent>
+            </Sheet>
             {children}
           </div>
         </ResizablePanel>

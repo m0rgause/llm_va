@@ -4,14 +4,11 @@ import Link from "next/link";
 import { MoreHorizontal, SquarePen, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Message } from "ai/react";
 import Image from "next/image";
 import { Suspense, useEffect, useState } from "react";
-import SidebarSkeleton from "./sidebar-skeleton";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import UserSettings from "./user-settings";
-import { ScrollArea, Scrollbar } from "@radix-ui/react-scroll-area";
-import PullModel from "./pull-model";
+import { Skeleton } from "./ui/skeleton";
+
 import {
   Dialog,
   DialogContent,
@@ -25,7 +22,6 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { TrashIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
 import useChatStore from "@/app/hooks/useChatStore";
 
@@ -36,6 +32,11 @@ interface SidebarProps {
   isMobile: boolean;
   chatId: string;
   closeSidebar?: () => void;
+}
+interface Semester {
+  id: number;
+  user_id: number;
+  nama: number;
 }
 
 export function Sidebar({
@@ -48,6 +49,19 @@ export function Sidebar({
 
   const chats = useChatStore((state) => state.chats);
   const handleDelete = useChatStore((state) => state.handleDelete);
+  const [semesters, setSemesters] = useState<Semester[]>([]);
+
+  useEffect(() => {
+    const fetchSemesters = async () => {
+      const response = await fetch("/api/v1/semester");
+      if (!response.ok) {
+        throw new Error("Failed to fetch semesters");
+      }
+      const data = await response.json();
+      setSemesters(data);
+    };
+    fetchSemesters();
+  }, []);
 
   return (
     <div
@@ -89,8 +103,9 @@ export function Sidebar({
               className={cn(
                 {
                   [buttonVariants({ variant: "secondaryLink" })]:
-                    chatId === "semester",
-                  [buttonVariants({ variant: "ghost" })]: chatId !== "semester",
+                    chatId.includes("dashboard/semester"),
+                  [buttonVariants({ variant: "ghost" })]:
+                    !chatId.includes("dashboard/semester"),
                 },
                 "flex justify-between w-full text-base font-normal items-center "
               )}
@@ -104,12 +119,37 @@ export function Sidebar({
           </Suspense>
         </div>
 
-        <div className="flex flex-col pt-5 gap-2">
+        <div className="flex flex-col pt-10 gap-2">
           <p className="pl-4 text-xs font-extrabold">Kartu Rencana Studi</p>
-          <Suspense fallback></Suspense>
+          <Suspense fallback>
+            {semesters &&
+              semesters.map((semester) => (
+                <Link
+                  key={semester.id}
+                  href={`/krs/semester/${semester.nama}`}
+                  className={cn(
+                    {
+                      [buttonVariants({ variant: "secondaryLink" })]:
+                        chatId === `/krs/semester/${semester.nama}`,
+                      [buttonVariants({ variant: "ghost" })]:
+                        chatId !== `/krs/semester/${semester.nama}`,
+                    },
+                    "flex justify-between w-full text-base font-normal items-center "
+                  )}
+                >
+                  <div className="flex gap-3 items-center truncate">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-normal py-5">
+                        Semester {semester.nama}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+          </Suspense>
         </div>
 
-        <div className="flex flex-col pt-5 gap-2">
+        <div className="flex flex-col pt-10 gap-2">
           <p className="pl-4 text-xs font-extrabold">Your chats</p>
           <Suspense fallback>
             {chats &&
