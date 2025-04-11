@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { TrashIcon } from "@radix-ui/react-icons";
-import { Pencil2Icon } from "@radix-ui/react-icons";
+
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import SemesterForm from "./formCreate";
+import SemesterForm from "./semester-add";
 
 interface Semester {
   id: number;

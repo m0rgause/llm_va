@@ -20,7 +20,6 @@ export function PageLayout({
   className?: string;
 }) {
   const pathname = usePathname();
-  console.log("pathname", pathname);
 
   const defaultLayout = [30, 160];
   const defaultCollapsed = false;
