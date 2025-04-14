@@ -22,31 +22,28 @@ interface KRSAddProps {
 
 const KRSAdd: React.FC<KRSAddProps> = ({ onKRSCreated, onAlert }) => {
   const { data: session, status } = useSession();
+  const pathname = usePathname();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
-    const user_id = session?.user.id;
-    const semesterId = usePathname().split("/").pop();
-    const krsData: KRS = {
-      id: 0,
-      user_id: Number(user_id),
-      hari: data.hari as string,
-      waktu_mulai: new Date(
-        new Date().toDateString() + " " + data.waktu_mulai
-      ).toISOString(),
-      waktu_selesai: new Date(
-        new Date().toDateString() + " " + data.waktu_selesai
-      ).toISOString(),
-      kode: data.kode as string,
-      mata_kuliah: data.mata_kuliah as string,
-      kelas: data.kelas as string,
-      ruang: data.ruang as string,
-      dosen: data.dosen as string,
+    const userId = session?.user.id;
+    const semesterId = pathname.split("/").pop();
+    const data = {
+      user_id: userId,
+      semester_id: semesterId,
+      hari: formData.get("hari"),
+      waktu_mulai: formData.get("waktu_mulai"),
+      waktu_selesai: formData.get("waktu_selesai"),
+      kode: formData.get("kode"),
+      mata_kuliah: formData.get("mata_kuliah"),
+      kelas: formData.get("kelas"),
+      ruang: formData.get("ruang"),
+      dosen: formData.get("dosen"),
     };
-    console.log(krsData);
+
+    console.log(data);
   };
 
   const days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
