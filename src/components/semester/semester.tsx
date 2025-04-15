@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { TrashIcon } from "@radix-ui/react-icons";
-
+import Alert from "../ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import SemesterForm from "./semester-add";
+import { useSession } from "next-auth/react";
 
 interface Semester {
   id: number;
@@ -18,8 +19,11 @@ interface Semester {
 }
 
 export default function SemesterLayout() {
+  const { data: session, status } = useSession();
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [alert, setAlert] = useState({ message: "", type: "" });
+  const [notify, setNotify] = useState(false);
 
   // Fetch semesters from the server
   useEffect(() => {
@@ -32,11 +36,57 @@ export default function SemesterLayout() {
         const data = await response.json();
         setSemesters(data);
       } catch (error) {
-        console.error("Error fetching semesters:", error);
+        throw new Error("Failed to fetch semesters");
       }
     };
+
+    const fetchNotify = async () => {
+      const userId = session?.user.id;
+      if (!userId) return;
+
+      try {
+        const response = await fetch(`/api/v1/user/notify/${userId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch notify");
+        }
+        const data = await response.json();
+        setNotify(data);
+      } catch (error) {
+        throw new Error("Failed to fetch notify");
+      }
+    };
+
+    fetchNotify();
     fetchSemesters();
   }, []);
+
+  const handleNotify = async (e: boolean) => {
+    const userId = session?.user.id;
+    if (!userId) return;
+
+    const response = await fetch(`/api/v1/user/notify/${userId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ notify: e, userId }),
+    });
+
+    if (!response.ok) {
+      setNotify(false);
+      // setAlert({ message: "Failed to update notify", type: "error" });
+      return;
+    }
+
+    const data = await response.json();
+    if (data) {
+      setNotify(e);
+      // setAlert({ message: "Notify updated successfully", type: "success" });
+    } else {
+      setNotify(false);
+      // setAlert({ message: "Failed to update notify", type: "error" });
+    }
+  };
 
   const handleSemesterCreated = (semester: Semester) => {
     setSemesters((prevSemesters) => [...prevSemesters, semester]);
@@ -48,6 +98,10 @@ export default function SemesterLayout() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Semester</h1>
       </div>
+      {/* alert */}
+      {(alert.message != "" || alert.type != "") && (
+        <Alert message={alert.message} type={alert.type as "error"} />
+      )}
       <div className="bg-accent dark:bg-card p-4 rounded shadow-lg mb-6">
         <div className="flex justify-between items-center mb-4">
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -66,14 +120,22 @@ export default function SemesterLayout() {
               aria-describedby="Add Semester"
             >
               <DialogTitle>Tambah Semester</DialogTitle>
-              <SemesterForm onSemesterCreated={handleSemesterCreated} />
+              <SemesterForm
+                onSemesterCreated={handleSemesterCreated}
+                onAlert={setAlert}
+              />
             </DialogContent>
           </Dialog>
           <label className="inline-flex items-center cursor-pointer">
             <span className="me-3 text-sm font-medium text-gray-900 dark:text-gray-300">
               Pengingat Kelas
             </span>
-            <input type="checkbox" value="" className="sr-only peer" />
+            <input
+              type="checkbox"
+              checked={notify}
+              className="sr-only peer"
+              onChange={(e) => handleNotify(e.target.checked)}
+            />
             <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
           </label>
         </div>

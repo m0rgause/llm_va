@@ -29,13 +29,18 @@ const KRSAdd: React.FC<KRSAddProps> = ({ onKRSCreated, onAlert }) => {
 
     const formData = new FormData(e.currentTarget);
     const userId = session?.user.id;
-    const semesterId = pathname.split("/").pop();
-    const data = {
+    const semester = pathname.split("/").pop();
+
+    const data: any = {
       user_id: userId,
-      semester_id: semesterId,
-      hari: formData.get("hari"),
-      waktu_mulai: formData.get("waktu_mulai"),
-      waktu_selesai: formData.get("waktu_selesai"),
+      semester: semester,
+      hari: formData.get("hari")?.toString().toLocaleLowerCase(),
+      waktu_mulai: new Date(
+        `1970-01-01T${formData.get("waktu_mulai")}:00Z`
+      ).toISOString(),
+      waktu_selesai: new Date(
+        `1970-01-01T${formData.get("waktu_selesai")}:00Z`
+      ).toISOString(),
       kode: formData.get("kode"),
       mata_kuliah: formData.get("mata_kuliah"),
       kelas: formData.get("kelas"),
@@ -43,7 +48,26 @@ const KRSAdd: React.FC<KRSAddProps> = ({ onKRSCreated, onAlert }) => {
       dosen: formData.get("dosen"),
     };
 
-    console.log(data);
+    // validate input
+    const response = await fetch("/api/v1/krs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      onAlert({ message: result.error, type: "error" });
+      return;
+    }
+
+    onKRSCreated(result);
+    onAlert({ message: "KRS created successfully", type: "success" });
+    setTimeout(() => {
+      onAlert({ message: "", type: "" });
+    }, 5000);
   };
 
   const days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
@@ -91,7 +115,6 @@ const KRSAdd: React.FC<KRSAddProps> = ({ onKRSCreated, onAlert }) => {
             type="time"
             name="waktu_mulai"
             className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-            value={"00:00"}
             required
           />
           <label
@@ -106,7 +129,6 @@ const KRSAdd: React.FC<KRSAddProps> = ({ onKRSCreated, onAlert }) => {
             type="time"
             name="waktu_selesai"
             className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-            value={"00:00"}
             required
           />
           <label

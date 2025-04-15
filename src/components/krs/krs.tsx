@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import KRSAdd from "./krs-add";
+import Alert from "../ui/alert";
 
 // No| Hari| Mulai| Selesai| Kode | Mata Kuliah| Kelas| Dosen
 interface KRS {
@@ -34,14 +35,14 @@ export default function KRS() {
   });
 
   const pathname = usePathname();
-  const semesterId = pathname.split("/").pop();
+  const semester = pathname.split("/").pop();
   const user_id = session?.user.id;
 
   useEffect(() => {
     const fetchKRS = async () => {
-      if (user_id && semesterId) {
+      if (user_id && semester) {
         const response = await fetch(
-          `/api/v1/krs?user_id=${user_id}&semester_id=${semesterId}`
+          `/api/v1/krs?user_id=${user_id}&semester=${semester}`
         );
 
         if (!response.ok) {
@@ -67,10 +68,24 @@ export default function KRS() {
     };
 
     fetchKRS();
-  }, [user_id, semesterId]);
+  }, [user_id, semester]);
 
   const handleChange = (krs: KRS) => {
-    setKrs((prevKrs) => [...prevKrs, krs]);
+    // setKrs((prevKrs) => [...prevKrs, krs]);
+    // apply date formatting
+    const formattedKRS = {
+      ...krs,
+      waktu_mulai: new Date(krs.waktu_mulai).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      waktu_selesai: new Date(krs.waktu_selesai).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+    setKrs((prevKrs) => [...prevKrs, formattedKRS]);
+
     setDialogOpen(false);
   };
 
@@ -99,9 +114,9 @@ export default function KRS() {
                 >
                   <path
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="m1 9 4-4-4-4"
                   />
                 </svg>
@@ -109,13 +124,17 @@ export default function KRS() {
                   href="#"
                   className="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white"
                 >
-                  Semester {semesterId}
+                  Semester {semester}
                 </a>
               </div>
             </li>
           </ol>
         </nav>
       </div>
+      {/* alert */}
+      {(alert.message != "" || alert.type != "") && (
+        <Alert message={alert.message} type={alert.type as "error"} />
+      )}
 
       <div className="bg-accent dark:bg-card p-4 rounded shadow-lg mb-6">
         <div className="flex justify-betweem items-center mb-4">
@@ -195,6 +214,38 @@ export default function KRS() {
                   <td className="px-6 py-4 flex gap-2">
                     <a
                       href="#"
+                      onClick={async () => {
+                        // send warning before delete
+                        const confirmDelete = confirm(
+                          `Apakah anda yakin ingin menghapus ${item.mata_kuliah}?`
+                        );
+                        if (!confirmDelete) {
+                          return;
+                        }
+
+                        const response = await fetch(`/api/v1/krs/${item.id}`, {
+                          method: "DELETE",
+                        });
+                        if (!response.ok) {
+                          setAlert({
+                            message: "Gagal menghapus KRS",
+                            type: "error",
+                          });
+                        }
+                        setKrs((prevKrs) =>
+                          prevKrs.filter((krs) => krs.id !== item.id)
+                        );
+                        const data = await response.json();
+
+                        setAlert({
+                          message: `Berhasil menghapus ${data.mata_kuliah}`,
+                          type: "success",
+                        });
+
+                        setTimeout(() => {
+                          setAlert({ message: "", type: "" });
+                        }, 3000);
+                      }}
                       className="font-medium text-red-600 dark:text-red-500 hover:underline"
                     >
                       Hapus

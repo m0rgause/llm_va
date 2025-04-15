@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     const existingSemester = await prisma.semester.findFirst({
       where: {
         nama: Number(nama),
-        user_id: Number(userId),
+        user_id: userId,
       },
     });
 
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
         nama: Number(nama),
         user: {
           connect: {
-            id: Number(userId),
+            id: userId,
           },
         },
       },

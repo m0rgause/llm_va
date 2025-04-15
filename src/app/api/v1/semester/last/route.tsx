@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
     const semester = await prisma.semester.findFirst({
       where: {
-        user_id: Number(userId),
+        user_id: userId,
       },
       orderBy: {
         nama: "desc",

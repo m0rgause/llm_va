@@ -1,4 +1,3 @@
-import Alert from "@/components/ui/alert";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 
@@ -10,16 +9,16 @@ interface Semester {
 
 interface SemesterFormProps {
   onSemesterCreated: (semester: Semester) => void;
+  onAlert: (alert: { message: string; type: string }) => void;
 }
 
-const SemesterForm: React.FC<SemesterFormProps> = ({ onSemesterCreated }) => {
+const SemesterForm: React.FC<SemesterFormProps> = ({
+  onSemesterCreated,
+  onAlert,
+}) => {
   // get session
   const { data: session, status } = useSession();
   const [lastSemester, setLastSemester] = useState<number | null>(null);
-  const [alert, setAlert] = useState({
-    message: "",
-    type: "",
-  });
 
   useEffect(() => {
     const fetchLastSemester = async () => {
@@ -29,7 +28,8 @@ const SemesterForm: React.FC<SemesterFormProps> = ({ onSemesterCreated }) => {
         );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch last semester");
+          onAlert({ message: "Failed to fetch last semester", type: "error" });
+          return;
         }
         const data = await response.json();
         setLastSemester(data?.nama);
@@ -55,7 +55,7 @@ const SemesterForm: React.FC<SemesterFormProps> = ({ onSemesterCreated }) => {
 
     // Validate input
     if (!data.nama) {
-      setAlert({ message: "Nama semester is required", type: "error" });
+      onAlert({ message: "Nama semester is required", type: "error" });
       return;
     }
 
@@ -70,25 +70,21 @@ const SemesterForm: React.FC<SemesterFormProps> = ({ onSemesterCreated }) => {
     if (!response.ok) {
       const { error } = await response.json();
 
-      setAlert({ message: error, type: "error" });
+      onAlert({ message: error, type: "error" });
       return;
     }
 
     const newSemester = await response.json();
     onSemesterCreated(newSemester);
 
-    setAlert({ message: "Semester created successfully", type: "success" });
+    onAlert({ message: "Semester created successfully", type: "success" });
     setTimeout(() => {
-      setAlert({ message: "", type: "" });
+      onAlert({ message: "", type: "" });
     }, 5000);
   };
 
   return (
     <div>
-      {alert.message && (
-        <Alert message={alert.message} type={alert.type as "error"} />
-      )}
-
       <form
         onSubmit={handleSubmit}
         className="space-y-2"
