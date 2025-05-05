@@ -60,6 +60,26 @@ export async function POST(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // is saved
+    const isSaved = await prisma.user.findFirst({
+      where: {
+        id: userId,
+        is_saved: true,
+      },
+    });
+
+    if (!isSaved) {
+      await prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          is_notify: false,
+        },
+      });
+      return NextResponse.json({ error: "User is not saved" }, { status: 400 });
+    }
+
     const updatedUser = await prisma.user.update({
       where: {
         id: userId,

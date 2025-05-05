@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TrashIcon } from "@radix-ui/react-icons";
+import { TrashIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import Alert from "../ui/alert";
 import {
   Dialog,
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import SemesterForm from "./semester-add";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 interface Semester {
   id: number;
@@ -22,6 +23,7 @@ export default function SemesterLayout() {
   const { data: session, status } = useSession();
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogNotifyOpen, setDialogNotifyOpen] = useState(false);
   const [alert, setAlert] = useState({ message: "", type: "" });
   const [notify, setNotify] = useState(false);
 
@@ -29,7 +31,9 @@ export default function SemesterLayout() {
   useEffect(() => {
     const fetchSemesters = async () => {
       try {
-        const response = await fetch("/api/v1/semester");
+        const userId = session?.user.id;
+        if (!userId) return;
+        const response = await fetch(`/api/v1/semester/${userId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch semesters");
         }
@@ -74,7 +78,10 @@ export default function SemesterLayout() {
 
     if (!response.ok) {
       setNotify(false);
-      // setAlert({ message: "Failed to update notify", type: "error" });
+      const { error } = await response.json();
+      if (error == "User is not saved") {
+        setDialogNotifyOpen(true);
+      }
       return;
     }
 
@@ -216,6 +223,50 @@ export default function SemesterLayout() {
           </table>
         </div>
       </div>
+      <Dialog open={dialogNotifyOpen} onOpenChange={setDialogNotifyOpen}>
+        <DialogContent className="space-y-2" aria-describedby="Add Semester">
+          <DialogTitle className="flex items-center gap-2">
+            Pengingat Kelas
+          </DialogTitle>
+          {/* col */}
+          <div className="flex gap-5">
+            <ExclamationTriangleIcon className="h-16 text-yellow-500 w-24 self-center" />
+            <p className="text-sm text-gray-700 dark:text-gray-300 self-center">
+              Untuk mengaktifkan pengingat kelas, silakan chat terlebih dahulu
+              ke nomor WhatsApp virtual assistant dengan mengklik button di
+              bawah.
+            </p>
+          </div>
+
+          <Link
+            onClick={() => setDialogNotifyOpen(false)}
+            href={`https://wa.me/${
+              process.env.NEXT_PUBLIC_BOT_WA_NUMBER
+            }?text=${encodeURIComponent(`!start ${session?.user.id}`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
+          >
+            Chat WhatsApp
+          </Link>
+
+          {/* <p className="text-sm text-gray-700 dark:text-gray-300">
+            Perhatian, untuk mengaktifkan pengingat kelas, user harus melakukan
+            chat terlebih dahulu ke nomor WhatsApp virtual assistant dengan
+            mengklik button di bawah.
+          </p>
+          <a
+            href={`https://wa.me/${
+              process.env.NEXT_PUBLIC_BOT_WA_NUMBER
+            }?text=${encodeURIComponent("!start")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Chat WhatsApp
+          </a> */}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

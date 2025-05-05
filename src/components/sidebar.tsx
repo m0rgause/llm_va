@@ -24,6 +24,7 @@ import {
 } from "./ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import useChatStore from "@/app/hooks/useChatStore";
+import { useSession } from "next-auth/react";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -46,6 +47,8 @@ export function Sidebar({
   closeSidebar,
 }: SidebarProps) {
   const router = useRouter();
+  const { data: session } = useSession();
+  const user_id = session?.user.id;
 
   const chats = useChatStore((state) => state.chats);
   const handleDelete = useChatStore((state) => state.handleDelete);
@@ -53,12 +56,19 @@ export function Sidebar({
 
   useEffect(() => {
     const fetchSemesters = async () => {
-      const response = await fetch("/api/v1/semester");
-      if (!response.ok) {
-        throw new Error("Failed to fetch semesters");
+      if (user_id) {
+        const response = await fetch(`/api/v1/semester?user_id=${user_id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch semesters");
+        }
+        const data = await response.json();
+        setSemesters(data);
       }
-      const data = await response.json();
-      setSemesters(data);
     };
     fetchSemesters();
   }, []);

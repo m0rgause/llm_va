@@ -118,7 +118,7 @@ export default function Signin(props: Props) {
     <div className="flex justify-center items-center min-h-screen ">
       <div className="w-full max-w-md p-8 bg-white-100 rounded-lg shadow-2xl">
         <Image
-          src="/logo.png"
+          src="/ollama.png"
           alt="logo"
           className="w-20 mx-auto mb-4"
           width={30}
@@ -132,7 +132,7 @@ export default function Signin(props: Props) {
       {/* use variable card color */}
       <div className="w-full max-w-md p-8 rounded-lg shadow-2xl bg-card/35">
         <Image
-          src="/logo.png"
+          src="/ollama.png"
           alt="logo"
           className="w-20 mx-auto mb-4"
           width={30}
@@ -199,10 +199,10 @@ export default function Signin(props: Props) {
           <p className="text-sm text-center text-gray-600">
             Don&apos;t have an account?{" "}
             <a
-              href="/register"
+              href="/auth/signup"
               className=" font-semibold hover:underline text-blue-500"
             >
-              Register
+              Sign Up
             </a>
           </p>
         </form>

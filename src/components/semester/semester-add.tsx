@@ -1,3 +1,4 @@
+import { set } from "lodash";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 
@@ -28,7 +29,8 @@ const SemesterForm: React.FC<SemesterFormProps> = ({
         );
 
         if (!response.ok) {
-          onAlert({ message: "Failed to fetch last semester", type: "error" });
+          // onAlert({ message: "Failed to fetch last semester", type: "error" });
+          setLastSemester(0);
           return;
         }
         const data = await response.json();
@@ -100,7 +102,7 @@ const SemesterForm: React.FC<SemesterFormProps> = ({
           <input
             type="number"
             name="nama"
-            value={lastSemester ? lastSemester + 1 : ""}
+            value={lastSemester !== null ? lastSemester + 1 : ""}
             id="nama"
             readOnly={true}
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-[#27272a] dark:border-gray-600 dark:text-white"

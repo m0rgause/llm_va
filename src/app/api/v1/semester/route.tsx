@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma";
 
-export async function GET() {
+export async function GET(request: Request) {
+  // get user id from body
+  const { searchParams } = new URL(request.url);
+  const userId = searchParams.get("user_id") ?? null;
+
   try {
-    const semesters = await prisma.semester.findMany();
+    const semesters = await prisma.semester.findMany({
+      where: {
+        ...(userId && { user_id: userId }),
+      },
+    });
     return NextResponse.json(semesters);
   } catch (error) {
     console.error("Error fetching semesters:", error);
@@ -13,6 +21,7 @@ export async function GET() {
     );
   }
 }
+
 export async function POST(request: Request) {
   const { nama, user_id } = await request.json();
   const userId = user_id;
