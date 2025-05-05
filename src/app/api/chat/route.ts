@@ -1,13 +1,69 @@
 import { createOllama } from "ollama-ai-provider";
-import {
-  streamText,
-  convertToCoreMessages,
-  CoreMessage,
-  UserContent,
-} from "ai";
-
+import { streamText, convertToCoreMessages, UserContent } from "ai";
+import { PromptTemplate } from "@langchain/core/prompts";
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
+
+const RELEVANCE_THRESHOLD = 0.3;
+
+export async function POST(req: Request) {
+  const { messages, selectedModel, data } = await req.json();
+
+  const ollamaUrl = process.env.OLLAMA_URL;
+  const initialMessages = messages.slice(0, -1);
+  const currentMessage = messages[messages.length - 1];
+
+  const ollama = createOllama({ baseURL: `${ollamaUrl}/api` });
+
+  let retrievedContent = "";
+  let relevanceScore = 0;
+  try {
+    const retrievedData = await retrieveFromPinecone(currentMessage.content);
+
+    if (retrievedData.length > 0) {
+      const bestMatch = retrievedData[0];
+      // relevanceScore = bestMatch.score;
+      // retrievedContent = bestMatch.chunk;
+      relevanceScore = retrievedData.map((item: any) => item.score);
+      retrievedContent = retrievedData
+        .map((item: any) => item.chunk)
+        .join("\n");
+    }
+  } catch (error) {
+    console.error("Error retrieving data from Pinecone:", error);
+  }
+
+  // if (relevanceScore < RELEVANCE_THRESHOLD) {
+  //   retrievedContent = "No relevant data found.";
+  // }
+
+  const prompt = PromptTemplate.fromTemplate(`
+You are a knowledgeable and friendly virtual assistant for University of SyaKi. Your task is to assist users by providing clear, natural, and semi-formal answers about the university, including academic programs, administrative procedures, and campus events. Always use polite, friendly, and natural-sounding language, similar to how a university staff or senior student would talk when helping others. Avoid robotic or overly rigid phrasing, and do not use excessive spacing or bullet lists unless it's absolutely necessary for clarity. If providing a list, it should be formatted smoothly in paragraph form without bullets. If the user asks for a list of courses, display the information in a neat table format. When relevant, use the following retrieved context to answer the user's question. If the user asks something unrelated to the context, respond with:  "Maaf, saya tidak memiliki informasi tentang hal tersebut."
+
+Retrieved Context:
+{retrieved_content}
+
+User Input:
+{user_input}
+
+Answer: 
+`);
+
+  const formattedPrompt = await prompt.format({
+    retrieved_content: retrievedContent,
+    user_input: currentMessage.content,
+  });
+
+  const result = streamText({
+    model: ollama(selectedModel),
+    messages: [
+      ...convertToCoreMessages(initialMessages),
+      { role: "user", content: formattedPrompt },
+    ],
+  });
+
+  return result.toDataStreamResponse();
+}
 
 async function retrieveFromPinecone(query: string) {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/retrieve`, {
@@ -24,46 +80,4 @@ async function retrieveFromPinecone(query: string) {
 
   const data = await response.json();
   return data.results || [];
-}
-
-export async function POST(req: Request) {
-  const { messages, selectedModel, data } = await req.json();
-
-  const ollamaUrl = process.env.OLLAMA_URL;
-  const initialMessages = messages.slice(0, -1);
-  const currentMessage = messages[messages.length - 1];
-
-  const ollama = createOllama({ baseURL: `${ollamaUrl}/api` });
-
-  let retrievedContent = "";
-  try {
-    const retrievedData = await retrieveFromPinecone(currentMessage.content);
-
-    if (retrievedData.length > 0) {
-      retrievedContent = retrievedData.map((d: any) => d.chunk).join("\n");
-    }
-  } catch (error) {
-    console.error("Error retrieving data from Pinecone:", error);
-  }
-
-  const augmentedMessageContent: UserContent = [
-    {
-      type: "text",
-      text: `Retrieved Context: ${retrievedContent}\n\nUser Input: ${currentMessage.content}`,
-    },
-  ];
-
-  console.log(
-    `Retrieved Context: ${retrievedContent}\n\nUser Input: ${currentMessage.content}`
-  );
-
-  const result = await streamText({
-    model: ollama(selectedModel),
-    messages: [
-      ...convertToCoreMessages(initialMessages),
-      { role: "user", content: augmentedMessageContent },
-    ],
-  });
-
-  return result.toDataStreamResponse();
 }

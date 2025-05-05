@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
     const results = await index.query({
       vector: queryEmbedding,
-      topK: 10,
+      topK: 5,
       includeMetadata: true,
     });
 

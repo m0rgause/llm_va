@@ -20,7 +20,9 @@ export type ChatMessageProps = {
   message: Message;
   isLast: boolean;
   isLoading: boolean | undefined;
-  reload: (chatRequestOptions?: ChatRequestOptions) => Promise<string | null | undefined>;
+  reload: (
+    chatRequestOptions?: ChatRequestOptions
+  ) => Promise<string | null | undefined>;
 };
 
 const MOTION_CONFIG = {
@@ -48,8 +50,11 @@ function ChatMessage({ message, isLast, isLoading, reload }: ChatMessageProps) {
     };
 
     return {
-      thinkContent: message.role === "assistant" ? getThinkContent(message.content) : null,
-      cleanContent: message.content.replace(/<think>[\s\S]*?(?:<\/think>|$)/g, '').trim(),
+      thinkContent:
+        message.role === "assistant" ? getThinkContent(message.content) : null,
+      cleanContent: message.content
+        .replace(/<think>[\s\S]*?(?:<\/think>|$)/g, "")
+        .trim(),
     };
   }, [message.content, message.role]);
 
@@ -78,8 +83,9 @@ function ChatMessage({ message, isLast, isLoading, reload }: ChatMessageProps) {
     </div>
   );
 
-  const renderThinkingProcess = () => (
-    thinkContent && message.role === "assistant" && (
+  const renderThinkingProcess = () =>
+    thinkContent &&
+    message.role === "assistant" && (
       <details className="mb-2 text-sm" open>
         <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
           Thinking process
@@ -88,22 +94,23 @@ function ChatMessage({ message, isLast, isLoading, reload }: ChatMessageProps) {
           <Markdown remarkPlugins={[remarkGfm]}>{thinkContent}</Markdown>
         </div>
       </details>
-    )
-  );
+    );
 
-  const renderContent = () => (
-    contentParts.map((part, index) => (
+  const renderContent = () => {
+    return contentParts.map((part, index) =>
       index % 2 === 0 ? (
-        <Markdown key={index} remarkPlugins={[remarkGfm]}>{part}</Markdown>
+        <Markdown key={index} remarkPlugins={[remarkGfm]}>
+          {part}
+        </Markdown>
       ) : (
         <pre className="whitespace-pre-wrap" key={index}>
           <CodeDisplayBlock code={part} />
         </pre>
       )
-    ))
-  );
+    );
+  };
 
-  const renderActionButtons = () => (
+  const renderActionButtons = () =>
     message.role === "assistant" && (
       <div className="pt-2 flex gap-1 items-center text-muted-foreground">
         {!isLoading && (
@@ -135,11 +142,13 @@ function ChatMessage({ message, isLast, isLoading, reload }: ChatMessageProps) {
           </ButtonWithTooltip>
         )}
       </div>
-    )
-  );
+    );
 
   return (
-    <motion.div {...MOTION_CONFIG} className="flex flex-col gap-2 whitespace-pre-wrap">
+    <motion.div
+      {...MOTION_CONFIG}
+      className="flex flex-col gap-2 whitespace-pre-wrap"
+    >
       <ChatBubble variant={message.role === "user" ? "sent" : "received"}>
         <ChatBubbleAvatar
           src={message.role === "assistant" ? "/ollama.png" : ""}
@@ -161,5 +170,8 @@ function ChatMessage({ message, isLast, isLoading, reload }: ChatMessageProps) {
 
 export default memo(ChatMessage, (prevProps, nextProps) => {
   if (nextProps.isLast) return false;
-  return prevProps.isLast === nextProps.isLast && prevProps.message === nextProps.message;
+  return (
+    prevProps.isLast === nextProps.isLast &&
+    prevProps.message === nextProps.message
+  );
 });

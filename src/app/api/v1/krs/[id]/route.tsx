@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/prisma";
 
 // delete krs by id
-export async function DELETE(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id") ?? null;
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params;
 
   try {
     if (!id) {

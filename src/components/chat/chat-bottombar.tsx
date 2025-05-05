@@ -124,14 +124,14 @@ export default function ChatBottombar({
               </div>
             ) : (
               // Default state
-              <div className="flex w-full justify-between">
-                <MultiImagePicker
+              <div className="flex w-full justify-end">
+                {/* <MultiImagePicker
                   disabled={isLoading}
                   onImagesPick={setBase64Images}
-                />
+                /> */}
                 <div>
                   {/* Microphone button with animation when listening */}
-                  <Button
+                  {/* <Button
                     className={`shrink-0 rounded-full ${
                       isListening
                         ? "relative bg-blue-500/30 hover:bg-blue-400/30"
@@ -147,7 +147,7 @@ export default function ChatBottombar({
                     {isListening && (
                       <span className="animate-pulse absolute h-[120%] w-[120%] rounded-full bg-blue-500/30" />
                     )}
-                  </Button>
+                  </Button> */}
 
                   {/* Send button */}
                   <Button
@@ -168,7 +168,7 @@ export default function ChatBottombar({
               </div>
             )}
           </div>
-          {base64Images && (
+          {/* {base64Images && (
             <div className="w-full flex px-2 pb-2 gap-2 ">
               {base64Images.map((image, index) => {
                 return (
@@ -200,7 +200,7 @@ export default function ChatBottombar({
                 );
               })}
             </div>
-          )}
+          )} */}
         </form>
       </AnimatePresence>
     </div>

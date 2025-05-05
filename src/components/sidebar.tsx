@@ -71,7 +71,7 @@ export function Sidebar({
       <div className=" flex flex-col justify-between p-2 max-h-fit overflow-y-auto">
         <Button
           onClick={() => {
-            router.push("/");
+            router.push("/chat");
             if (closeSidebar) {
               closeSidebar();
             }
@@ -162,7 +162,7 @@ export function Sidebar({
                 .map(([id, chat]) => (
                   <Link
                     key={id}
-                    href={`/c/${id}`}
+                    href={`/chat/c/${id}`}
                     className={cn(
                       {
                         [buttonVariants({ variant: "secondaryLink" })]:

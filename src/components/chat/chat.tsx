@@ -43,7 +43,7 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
       const savedMessages = getMessagesById(id);
       saveMessages(id, [...savedMessages, message]);
       setLoadingSubmit(false);
-      router.replace(`/c/${id}`);
+      router.replace(`/chat/c/${id}`);
     },
     onError: (error) => {
       setLoadingSubmit(false);
@@ -64,7 +64,7 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    window.history.replaceState({}, "", `/c/${id}`);
+    window.history.replaceState({}, "", `/chat/c/${id}`);
 
     if (!selectedModel) {
       toast.error("Please select a model");

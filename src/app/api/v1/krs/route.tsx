@@ -52,7 +52,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  let body = await request.json();
   console.log("Request Body:", body);
 
   try {
@@ -110,12 +110,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error }, { status: 400 });
     }
 
+    //conver waktu_mulai and waktu_selesai to asia/jakarta timezone
+    const waktuMulai = new Date(
+      new Date(body.waktu_mulai).toLocaleString("en-US", {
+        timeZone: "Asia/Jakarta",
+      })
+    ).toISOString();
+    const waktuSelesai = new Date(
+      new Date(body.waktu_selesai).toLocaleString("en-US", {
+        timeZone: "Asia/Jakarta",
+      })
+    ).toISOString();
+
     const krs = await prisma.kelas.create({
       data: {
         semester_id: existingSemester!.id,
         hari: body.hari,
-        waktu_mulai: body.waktu_mulai,
-        waktu_selesai: body.waktu_selesai,
+        waktu_mulai: waktuMulai,
+        waktu_selesai: waktuSelesai,
         kode: body.kode,
         mata_kuliah: body.mata_kuliah,
         kelas: body.kelas,

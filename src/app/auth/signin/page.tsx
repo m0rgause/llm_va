@@ -5,6 +5,7 @@ import { signIn, useSession } from "next-auth/react";
 import Alert from "@/components/ui/alert";
 import React from "react";
 import "@/app/globals.css";
+import Image from "next/image";
 
 type Props = {
   className?: string;
@@ -116,7 +117,13 @@ export default function Signin(props: Props) {
   return loading ? (
     <div className="flex justify-center items-center min-h-screen ">
       <div className="w-full max-w-md p-8 bg-white-100 rounded-lg shadow-2xl">
-        <img src="/logo.png" alt="logo" className="w-20 mx-auto mb-4" />
+        <Image
+          src="/logo.png"
+          alt="logo"
+          className="w-20 mx-auto mb-4"
+          width={30}
+          height={30}
+        />
         <h1 className="text-2xl font-semibold  text-center">Loading...</h1>
       </div>
     </div>
@@ -124,7 +131,13 @@ export default function Signin(props: Props) {
     <div className="flex justify-center items-center min-h-screen">
       {/* use variable card color */}
       <div className="w-full max-w-md p-8 rounded-lg shadow-2xl bg-card/35">
-        <img src="/logo.png" alt="logo" className="w-20 mx-auto mb-4" />
+        <Image
+          src="/logo.png"
+          alt="logo"
+          className="w-20 mx-auto mb-4"
+          width={30}
+          height={30}
+        />
         <h1 className="text-2xl font-semibold  text-center">Login</h1>
 
         {/* alert */}
@@ -184,7 +197,7 @@ export default function Signin(props: Props) {
             Login
           </button>
           <p className="text-sm text-center text-gray-600">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <a
               href="/register"
               className=" font-semibold hover:underline text-blue-500"

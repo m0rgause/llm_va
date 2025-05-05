@@ -13,6 +13,7 @@ export function ThemeProvider({ children, ...props }: any) {
   const router = useRouter();
   const pathname = usePathname();
   const isProtectedRoute = !unprotectedRoutes.includes(pathname);
+
   React.useEffect(() => {
     if (status === "unauthenticated") {
       if (isProtectedRoute) {
@@ -21,9 +22,13 @@ export function ThemeProvider({ children, ...props }: any) {
     }
   }, [status, router]);
   // check if session is loading
-  if (status === "loading" || status === "unauthenticated") {
+  if (status === "loading") {
     if (isProtectedRoute) {
-      return null;
+      return (
+        <div className="flex h-screen w-screen items-center justify-center dark:bg-gray-900 bg-gray-100">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+        </div>
+      );
     }
   }
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>;

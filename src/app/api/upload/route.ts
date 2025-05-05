@@ -29,7 +29,10 @@ export async function GET(req: Request) {
     });
 
     for (const doc of docs) {
-      const splitter = new RecursiveCharacterTextSplitter();
+      const splitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 1000,
+        chunkOverlap: 200,
+      });
       const documentChunks = await splitter.splitText(doc.pageContent);
 
       let chunkBatchIndex = 0;

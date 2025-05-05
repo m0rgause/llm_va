@@ -38,6 +38,15 @@ export default function KRS() {
   const semester = pathname.split("/").pop();
   const user_id = session?.user.id;
 
+  const formatTime = (date: string) => {
+    const dateObj = new Date(date);
+    const hours = dateObj.getUTCHours();
+    const minutes = dateObj.getUTCMinutes();
+    const amPm = hours < 12 ? "AM" : "PM";
+    const formattedHours = hours % 12 || 12;
+    return `${formattedHours}:${String(minutes).padStart(2, "0")} ${amPm}`;
+  };
+
   useEffect(() => {
     const fetchKRS = async () => {
       if (user_id && semester) {
@@ -49,18 +58,13 @@ export default function KRS() {
           throw new Error("Failed to fetch KRS");
         }
         const data = await response.json();
+
         // re apply date formatting
         const formattedData = data.map((item: KRS) => {
           return {
             ...item,
-            waktu_mulai: new Date(item.waktu_mulai).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            waktu_selesai: new Date(item.waktu_selesai).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
+            waktu_mulai: formatTime(item.waktu_mulai),
+            waktu_selesai: formatTime(item.waktu_selesai),
           };
         });
         setKrs(formattedData);
@@ -71,18 +75,10 @@ export default function KRS() {
   }, [user_id, semester]);
 
   const handleChange = (krs: KRS) => {
-    // setKrs((prevKrs) => [...prevKrs, krs]);
-    // apply date formatting
     const formattedKRS = {
       ...krs,
-      waktu_mulai: new Date(krs.waktu_mulai).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      waktu_selesai: new Date(krs.waktu_selesai).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      waktu_mulai: formatTime(krs.waktu_mulai),
+      waktu_selesai: formatTime(krs.waktu_selesai),
     };
     setKrs((prevKrs) => [...prevKrs, formattedKRS]);
 
@@ -226,15 +222,18 @@ export default function KRS() {
                         const response = await fetch(`/api/v1/krs/${item.id}`, {
                           method: "DELETE",
                         });
+
                         if (!response.ok) {
                           setAlert({
                             message: "Gagal menghapus KRS",
                             type: "error",
                           });
+                          return;
                         }
                         setKrs((prevKrs) =>
                           prevKrs.filter((krs) => krs.id !== item.id)
                         );
+
                         const data = await response.json();
 
                         setAlert({
