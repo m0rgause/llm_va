@@ -22,11 +22,17 @@ export async function POST(req: Request) {
 
     const results = await index.query({
       vector: queryEmbedding,
-      topK: 5,
+      topK: 3,
       includeMetadata: true,
     });
 
-    const formattedResults = results.matches.map((match) => ({
+    // filter hasil dengan score di atas 0.5
+    // Filter hasil dengan score yang memadai
+    const filteredResults = results.matches.filter(
+      (match) => (match.score ?? 0) >= 0.7
+    );
+
+    const formattedResults = filteredResults.map((match) => ({
       chunk: match.metadata!.chunk,
       score: match.score,
     }));

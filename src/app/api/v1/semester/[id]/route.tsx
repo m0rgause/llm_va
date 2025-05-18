@@ -14,6 +14,9 @@ export async function GET(
       where: {
         user_id: id,
       },
+      orderBy: {
+        nama: "asc",
+      },
     });
 
     if (!semester) {

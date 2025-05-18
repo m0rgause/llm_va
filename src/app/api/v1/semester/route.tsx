@@ -11,6 +11,9 @@ export async function GET(request: Request) {
       where: {
         ...(userId && { user_id: userId }),
       },
+      orderBy: {
+        nama: "asc",
+      },
     });
     return NextResponse.json(semesters);
   } catch (error) {

@@ -4,8 +4,6 @@ import { PromptTemplate } from "@langchain/core/prompts";
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
-const RELEVANCE_THRESHOLD = 0.3;
-
 export async function POST(req: Request) {
   const { messages, selectedModel, data } = await req.json();
 
@@ -21,24 +19,20 @@ export async function POST(req: Request) {
     const retrievedData = await retrieveFromPinecone(currentMessage.content);
 
     if (retrievedData.length > 0) {
-      const bestMatch = retrievedData[0];
-      // relevanceScore = bestMatch.score;
-      // retrievedContent = bestMatch.chunk;
-      relevanceScore = retrievedData.map((item: any) => item.score);
+      // relevanceScore = retrievedData.map((item: any) => item.score);
       retrievedContent = retrievedData
-        .map((item: any) => item.chunk)
-        .join("\n");
+        .slice(0, 3)
+        .map(
+          (item: any) => `[Relevansi: ${item.score.toFixed(2)}] ${item.chunk}`
+        )
+        .join("\n\n---\n\n");
     }
   } catch (error) {
     console.error("Error retrieving data from Pinecone:", error);
   }
 
-  // if (relevanceScore < RELEVANCE_THRESHOLD) {
-  //   retrievedContent = "No relevant data found.";
-  // }
-
   const prompt = PromptTemplate.fromTemplate(`
-You are a knowledgeable and friendly virtual assistant for University of SyaKi. Your task is to assist users by providing clear, natural, and semi-formal answers about the university, including academic programs, administrative procedures, and campus events. Always use polite, friendly, and natural-sounding language, similar to how a university staff or senior student would talk when helping others. Avoid robotic or overly rigid phrasing, and do not use excessive spacing or bullet lists unless it's absolutely necessary for clarity. If providing a list, it should be formatted smoothly in paragraph form without bullets. If the user asks for a list of courses, display the information in a neat table format. When relevant, use the following retrieved context to answer the user's question. If the user asks something unrelated to the context, respond with:  "Maaf, saya tidak memiliki informasi tentang hal tersebut."
+You are a knowledgeable and friendly virtual assistant for University of SyaKi. Your task is to assist users by providing clear, natural, and semi-formal answers about the university, including academic programs, administrative procedures, and campus events. Always use polite, friendly, and natural-sounding language, similar to how a university staff or senior student would talk when helping others. Avoid robotic or overly rigid phrasing, and do not use excessive spacing or bullet lists unless it's absolutely necessary for clarity. If providing a list, it should be formatted smoothly in paragraph form without bullets. If the user asks for a list of courses, display the information in a neat table format. If the retrieved context contains relevant information to answer the question, use only that information to form your answer. Do not make up answers or pull from general knowledge. If the context does not provide the needed answer, respond with: "Maaf, saya tidak memiliki informasi tentang hal tersebut."
 
 Retrieved Context:
 {retrieved_content}
@@ -46,13 +40,14 @@ Retrieved Context:
 User Input:
 {user_input}
 
-Answer: 
+Answer:
 `);
 
   const formattedPrompt = await prompt.format({
     retrieved_content: retrievedContent,
     user_input: currentMessage.content,
   });
+  console.log("Formatted Prompt:", formattedPrompt);
 
   const result = streamText({
     model: ollama(selectedModel),
@@ -60,6 +55,7 @@ Answer:
       ...convertToCoreMessages(initialMessages),
       { role: "user", content: formattedPrompt },
     ],
+    temperature: 0.3,
   });
 
   return result.toDataStreamResponse();
