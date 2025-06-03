@@ -50,7 +50,7 @@ export default function EditUsernameForm({ setOpen }: EditUsernameFormProps) {
         <FormLabel>Theme</FormLabel>
         <ModeToggle />
       </div>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      {/* <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
           name="username"
@@ -67,7 +67,7 @@ export default function EditUsernameForm({ setOpen }: EditUsernameFormProps) {
             </FormItem>
           )}
         />
-      </form>
+      </form> */}
     </Form>
   );
 }

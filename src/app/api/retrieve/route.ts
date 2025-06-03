@@ -1,6 +1,7 @@
 import { Pinecone as PineconeClient } from "@pinecone-database/pinecone";
 import { OllamaEmbeddings } from "@langchain/ollama";
 import { NextResponse } from "next/server";
+import { getModel } from "@/utils/model";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -9,20 +10,18 @@ const pinecone = new PineconeClient({
   apiKey: process.env.PINECONE_API_KEY!,
 });
 
-const index = pinecone.index("va").namespace("cnn");
+const index = pinecone.index("va").namespace("syaki");
 
 export async function POST(req: Request) {
   try {
     const { query } = await req.json();
-    const model = new OllamaEmbeddings({
-      model: "mxbai-embed-large",
-    });
+    const model = await getModel();
 
     const queryEmbedding = await model.embedQuery(query);
 
     const results = await index.query({
       vector: queryEmbedding,
-      topK: 3,
+      topK: 15,
       includeMetadata: true,
     });
 
@@ -33,7 +32,7 @@ export async function POST(req: Request) {
     );
 
     const formattedResults = filteredResults.map((match) => ({
-      chunk: match.metadata!.chunk,
+      text: match.metadata!.text,
       score: match.score,
     }));
 

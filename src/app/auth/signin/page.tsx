@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import Alert from "@/components/ui/alert";
 import React from "react";
-import "@/app/globals.css";
 import Image from "next/image";
 
 type Props = {

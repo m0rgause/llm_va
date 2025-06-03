@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       retrievedContent = retrievedData
         .slice(0, 3)
         .map(
-          (item: any) => `[Relevansi: ${item.score.toFixed(2)}] ${item.chunk}`
+          (item: any) => `[Relevansi: ${item.score.toFixed(2)}] ${item.text}`
         )
         .join("\n\n---\n\n");
     }

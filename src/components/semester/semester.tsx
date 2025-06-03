@@ -62,7 +62,7 @@ export default function SemesterLayout() {
 
     fetchNotify();
     fetchSemesters();
-  }, []);
+  }, [session]);
 
   const handleNotify = async (e: boolean) => {
     const userId = session?.user.id;
@@ -249,22 +249,6 @@ export default function SemesterLayout() {
           >
             Chat WhatsApp
           </Link>
-
-          {/* <p className="text-sm text-gray-700 dark:text-gray-300">
-            Perhatian, untuk mengaktifkan pengingat kelas, user harus melakukan
-            chat terlebih dahulu ke nomor WhatsApp virtual assistant dengan
-            mengklik button di bawah.
-          </p>
-          <a
-            href={`https://wa.me/${
-              process.env.NEXT_PUBLIC_BOT_WA_NUMBER
-            }?text=${encodeURIComponent("!start")}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            Chat WhatsApp
-          </a> */}
         </DialogContent>
       </Dialog>
     </div>

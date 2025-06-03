@@ -7,7 +7,6 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import Image from "next/image";
 import { Suspense, useEffect, useState } from "react";
 import UserSettings from "./user-settings";
-import { Skeleton } from "./ui/skeleton";
 
 import {
   Dialog,
@@ -71,7 +70,7 @@ export function Sidebar({
       }
     };
     fetchSemesters();
-  }, []);
+  }, [user_id]);
 
   return (
     <div

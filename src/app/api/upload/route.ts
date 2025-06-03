@@ -1,10 +1,10 @@
 import { Pinecone as PineconeClient } from "@pinecone-database/pinecone";
-import { OllamaEmbeddings } from "@langchain/ollama";
 import { NextResponse } from "next/server";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { getModel } from "@/utils/model";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,8 +14,6 @@ const pinecone = new PineconeClient({
   apiKey: process.env.PINECONE_API_KEY!,
 });
 
-const index = pinecone.index("va");
-
 export async function GET(req: Request) {
   try {
     const loader = new DirectoryLoader("./docs", {
@@ -24,14 +22,13 @@ export async function GET(req: Request) {
     });
 
     const docs = await loader.load();
-    const model = new OllamaEmbeddings({
-      model: "mxbai-embed-large",
-    });
+    const model = await getModel();
 
     for (const doc of docs) {
       const splitter = new RecursiveCharacterTextSplitter({
         chunkSize: 1000,
         chunkOverlap: 200,
+        separators: ["\n\n", "\n", " ", ""],
       });
       const documentChunks = await splitter.splitText(doc.pageContent);
 
@@ -53,13 +50,14 @@ export async function GET(req: Request) {
             id: `chunk-${i}-${Date.now()}-${chunkBatchIndex}`,
             values: embedding,
             metadata: {
-              chunk: chunk,
+              text: chunk,
+              // chunk: chunk,
             },
           };
           vectorBatch.push(vector);
         }
 
-        const index = pinecone.index("va").namespace("cnn");
+        const index = pinecone.index("va").namespace("syaki");
 
         await index.upsert(vectorBatch);
         console.log(`Batch ${chunkBatchIndex} berhasil diunggah ke Pinecone.`);
@@ -77,40 +75,3 @@ export async function GET(req: Request) {
     );
   }
 }
-
-// export async function GET(req: Request) {
-//   try {
-//     const texts = [
-//       "Pengetahuan tentang Universitas Mercubuana",
-//       "Bagaimana cara mendaftar di Universitas Mercubuana",
-//       "Apa saja fakultas yang ada di Universitas Mercubuana",
-//       "Apa saja program studi yang ada di Universitas Mercubuana",
-//       "Apa saja fasilitas yang ada di Universitas Mercubuana",
-//       "Apa saja kegiatan ekstrakurikuler yang ada di Universitas Mercubuana",
-//     ];
-
-//     const embeddingModel = new OllamaEmbeddings({
-//       model: "mxbai-embed-large",
-//     });
-
-//     const embeddings = await Promise.all(
-//       texts.map(async (text, index) => ({
-//         id: `line-${index}-${Date.now()}`,
-//         values: await embeddingModel.embedQuery(text),
-//         metadata: { content: text },
-//       }))
-//     );
-
-//     await index.upsert(embeddings);
-
-//     return NextResponse.json({
-//       message: "Data berhasil diunggah ke Pinecone.",
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     return NextResponse.json(
-//       { error: "Terjadi kesalahan dalam mengunggah data." },
-//       { status: 500 }
-//     );
-//   }
-// }

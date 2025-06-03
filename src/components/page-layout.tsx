@@ -11,6 +11,8 @@ import { Sidebar } from "./sidebar";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { SidebarAdministrator } from "./sidebarAdministrator";
 
 export function PageLayout({
   children,
@@ -20,11 +22,14 @@ export function PageLayout({
   className?: string;
 }) {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   const defaultLayout = [30, 160];
   const defaultCollapsed = false;
   const navCollapsedSize = 10;
   const path = pathname;
+  // splitting pathname
+  const pathParts = path.split("/");
 
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [isMobile, setIsMobile] = useState(false);
@@ -86,12 +91,30 @@ export function PageLayout({
               : "hidden md:block"
           )}
         >
-          <Sidebar
+          {session?.user.role === "administrator" &&
+          pathParts[1] === "administrator" ? (
+            <SidebarAdministrator
+              isCollapsed={isCollapsed || isMobile}
+              // messages={initialMessages}
+              isMobile={isMobile}
+              chatId={path}
+              closeSidebar={handleCloseSidebar}
+            />
+          ) : (
+            <Sidebar
+              isCollapsed={isCollapsed || isMobile}
+              // messages={initialMessages}
+              isMobile={isMobile}
+              chatId={path}
+              closeSidebar={handleCloseSidebar}
+            />
+          )}
+          {/* <Sidebar
             isCollapsed={isCollapsed || isMobile}
             // messages={initialMessages}
             isMobile={isMobile}
             chatId={path}
-          />
+          /> */}
         </ResizablePanel>
         <ResizableHandle className={cn("hidden md:flex")} withHandle />
         <ResizablePanel
