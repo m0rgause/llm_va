@@ -84,7 +84,7 @@ Answer:
 
   // Menggunakan generateText untuk mendapatkan hasil lengkap
   const result = await generateText({
-    model: ollama("llama3.2"),
+    model: ollama("llama3.1"),
     messages: [
       ...convertToCoreMessages(initialMessages),
       { role: "user", content: formattedPrompt },

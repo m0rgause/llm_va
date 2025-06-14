@@ -50,7 +50,7 @@ Answer:
   console.log("Formatted Prompt:", formattedPrompt);
 
   const result = streamText({
-    model: ollama(selectedModel),
+    model: ollama("llama3.1"),
     messages: [
       ...convertToCoreMessages(initialMessages),
       { role: "user", content: formattedPrompt },
