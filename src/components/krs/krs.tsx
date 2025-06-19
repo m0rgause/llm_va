@@ -207,6 +207,45 @@ export default function KRS() {
                   <td className="px-6 py-4">{item.ruang}</td>
                   <td className="px-6 py-4">{item.dosen}</td>
                   <td className="px-6 py-4 flex gap-2">
+                    {/* edit */}
+                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                      <DialogTrigger asChild>
+                        <button
+                          className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                          onClick={() => {
+                            setDialogOpen(true);
+                            // set the form values to the selected item
+                            const form = document.querySelector(
+                              "#krs-form"
+                            ) as HTMLFormElement;
+                            if (form) {
+                              form.hari.value = item.hari;
+                              form.waktu_mulai.value = item.waktu_mulai;
+                              form.waktu_selesai.value = item.waktu_selesai;
+                              form.kode.value = item.kode;
+                              form.mata_kuliah.value = item.mata_kuliah;
+                              form.kelas.value = item.kelas;
+                              form.ruang.value = item.ruang;
+                              form.dosen.value = item.dosen;
+                              // form.id.value = String(item.id);
+                            }
+                          }}
+                        >
+                          Edit
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent
+                        className="space-y-2"
+                        aria-describedby="Edit KRS"
+                      >
+                        <DialogTitle>Edit Mata Kuliah</DialogTitle>
+                        <KRSAdd
+                          onKRSCreated={handleChange}
+                          onAlert={setAlert}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                    {/* delete */}
                     <a
                       href="#"
                       onClick={async () => {
