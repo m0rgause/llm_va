@@ -1,7 +1,7 @@
 import { createOllama } from "ollama-ai-provider";
 import { streamText, convertToCoreMessages, UserContent } from "ai";
 import { PromptTemplate } from "@langchain/core/prompts";
-// export const runtime = "edge";
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
