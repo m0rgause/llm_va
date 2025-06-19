@@ -115,6 +115,7 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
       // router.replace("/"); // Consider if you always want to redirect on error
       console.error("AI SDK Error:", error.message);
       console.error("AI SDK Error Cause:", error.cause);
+      console.error(error);
 
       // Set a custom error message for the UI if it was our timeout
       if (error.cause === "CLIENT_TIMEOUT") {

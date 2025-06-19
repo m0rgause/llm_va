@@ -12,7 +12,13 @@ export async function POST(req: Request) {
     abortController.abort();
   });
 
-  const { messages, selectedModel, data } = await req.json();
+  let messages, selectedModel, data;
+  try {
+    ({ messages, selectedModel, data } = await req.json());
+  } catch (error) {
+    console.error("Error parsing request JSON:", error);
+    return new Response("Invalid JSON", { status: 400 });
+  }
 
   const ollamaUrl = process.env.OLLAMA_URL;
   const initialMessages = messages.slice(0, -1);
@@ -39,7 +45,9 @@ export async function POST(req: Request) {
     console.error("Error retrieving data from Pinecone:", error);
   }
 
-  const prompt = PromptTemplate.fromTemplate(`
+  let formattedPrompt = "";
+  try {
+    const prompt = PromptTemplate.fromTemplate(`
 == Context ==
 {retrieved_content}
 
@@ -48,38 +56,56 @@ export async function POST(req: Request) {
 
 == Response ==
 `);
+    formattedPrompt = await prompt.format({
+      retrieved_content: retrievedContent,
+      user_input: normalizeText(currentMessage.content),
+    });
+  } catch (error) {
+    console.error("Error formatting prompt:", error);
+    return new Response("Prompt formatting error", { status: 500 });
+  }
 
-  const formattedPrompt = await prompt.format({
-    retrieved_content: retrievedContent,
-    user_input: normalizeText(currentMessage.content),
-  });
+  let result;
+  try {
+    result = streamText({
+      model: ollama("syaki-ai"),
+      messages: [
+        ...convertToCoreMessages(initialMessages),
+        { role: "user", content: formattedPrompt },
+      ],
+      abortSignal: abortController.signal,
+      temperature: 0.2,
+      maxTokens: 1024,
+    });
+  } catch (error) {
+    console.error("Error streaming text:", error);
+    return new Response("Text streaming error", { status: 500 });
+  }
 
-  // console.log("Formatted Prompt:", formattedPrompt);
-
-  const result = streamText({
-    model: ollama("syaki-ai"),
-    messages: [
-      ...convertToCoreMessages(initialMessages),
-      { role: "user", content: formattedPrompt },
-    ],
-    abortSignal: abortController.signal,
-    temperature: 0.2,
-    maxTokens: 1024,
-  });
-
-  return result.toDataStreamResponse();
+  try {
+    return result.toDataStreamResponse();
+  } catch (error) {
+    console.error("Error returning data stream response:", error);
+    return new Response("Stream response error", { status: 500 });
+  }
 }
 
 async function retrieveFromPinecone(query: string) {
   console.log("Starting Pinecone retrieval...");
   const startTime = Date.now();
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/retrieve`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ query }),
-  });
+  let response;
+  try {
+    response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/retrieve`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    });
+  } catch (error) {
+    console.error("Fetch error in retrieveFromPinecone:", error);
+    throw error;
+  }
 
   if (!response.ok) {
     throw new Error(
@@ -87,7 +113,13 @@ async function retrieveFromPinecone(query: string) {
     );
   }
 
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    console.error("Error parsing Pinecone response JSON:", error);
+    throw error;
+  }
   const endTime = Date.now();
   console.log(`Pinecone retrieval finished in ${endTime - startTime}ms`);
   return data.results || [];
