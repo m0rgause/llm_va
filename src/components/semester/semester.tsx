@@ -210,12 +210,56 @@ export default function SemesterLayout() {
                     Semester {semester.nama}
                   </th>
                   <td className="px-6 py-4 flex gap-2">
-                    <a
-                      href="#"
-                      className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                    <form
+                      method="POST"
+                      action="."
+                      onSubmit={async (e) => {
+                        console.log("Deleting semester:", semester.id);
+                        e.preventDefault();
+                        const res = await fetch(
+                          `/api/v1/semester/${semester.id}`,
+                          {
+                            method: "DELETE",
+                          }
+                        );
+                        if (res.ok) {
+                          setSemesters((prev) =>
+                            prev.filter((s) => s.id !== semester.id)
+                          );
+                          // reload the page to reflect changes
+                          setAlert({
+                            message: "Semester berhasil dihapus",
+                            type: "success",
+                          });
+                          setTimeout(() => {
+                            setAlert({ message: "", type: "" });
+                          }, 3000);
+                          window.location.reload();
+                        } else {
+                          setAlert({
+                            message: "Gagal menghapus semester",
+                            type: "error",
+                          });
+                        }
+                      }}
                     >
-                      <TrashIcon className="w-5 h-5" />
-                    </a>
+                      <button
+                        type="submit"
+                        className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                        title="Hapus Semester"
+                        onClick={(e) => {
+                          if (
+                            !confirm(
+                              "Apakah Anda yakin ingin menghapus semester ini? Semua data terkait semester ini akan dihapus."
+                            )
+                          ) {
+                            return;
+                          }
+                        }}
+                      >
+                        <TrashIcon className="w-5 h-5" />
+                      </button>
+                    </form>
                   </td>
                 </tr>
               ))}

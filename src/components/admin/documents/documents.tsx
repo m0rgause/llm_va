@@ -214,12 +214,53 @@ export default function Documents() {
                   <td className="px-6 py-4">{doc.file_size} KB</td>
                   <td className="px-6 py-4">{doc.user.nama}</td>
                   <td className="px-6 py-4 flex gap-2">
-                    <a
-                      href="#"
-                      className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                    <form
+                      method="POST"
+                      action={`/api/v1/documents/${doc.id}`}
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        try {
+                          const res = await fetch(
+                            `/api/v1/documents/${doc.id}`,
+                            {
+                              method: "DELETE",
+                            }
+                          );
+                          if (!res.ok) {
+                            throw new Error("Failed to delete document");
+                          }
+                          setDocuments((prev) =>
+                            prev.filter((d) => d.id !== doc.id)
+                          );
+                          setAlert({
+                            message: "Document deleted successfully",
+                            type: "success",
+                          });
+                        } catch {
+                          setAlert({
+                            message: "Error deleting document",
+                            type: "error",
+                          });
+                        }
+                      }}
                     >
-                      <TrashIcon className="w-5 h-5" />
-                    </a>
+                      <button
+                        type="submit"
+                        className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                        title="Delete"
+                        onClick={(e) => {
+                          if (
+                            !confirm(
+                              "Apakah Anda yakin ingin menghapus dokumen ini?"
+                            )
+                          ) {
+                            return;
+                          }
+                        }}
+                      >
+                        <TrashIcon className="w-5 h-5" />
+                      </button>
+                    </form>
                   </td>
                 </tr>
               ))}

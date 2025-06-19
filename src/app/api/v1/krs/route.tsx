@@ -111,23 +111,23 @@ export async function POST(request: Request) {
     }
 
     //conver waktu_mulai and waktu_selesai to asia/jakarta timezone
-    const waktuMulai = new Date(
-      new Date(body.waktu_mulai).toLocaleString("en-US", {
-        timeZone: "Asia/Jakarta",
-      })
-    ).toISOString();
-    const waktuSelesai = new Date(
-      new Date(body.waktu_selesai).toLocaleString("en-US", {
-        timeZone: "Asia/Jakarta",
-      })
-    ).toISOString();
+    // const waktuMulai = new Date(
+    //   new Date(body.waktu_mulai).toLocaleString("en-US", {
+    //     timeZone: "Asia/Jakarta",
+    //   })
+    // ).toISOString();
+    // const waktuSelesai = new Date(
+    //   new Date(body.waktu_selesai).toLocaleString("en-US", {
+    //     timeZone: "Asia/Jakarta",
+    //   })
+    // ).toISOString();
 
     const krs = await prisma.kelas.create({
       data: {
         semester_id: existingSemester!.id,
         hari: body.hari,
-        waktu_mulai: waktuMulai,
-        waktu_selesai: waktuSelesai,
+        waktu_mulai: body.waktu_mulai,
+        waktu_selesai: body.waktu_selesai,
         kode: body.kode,
         mata_kuliah: body.mata_kuliah,
         kelas: body.kelas,

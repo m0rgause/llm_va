@@ -100,68 +100,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let loader;
-    if (file_type === "application/pdf") {
-      loader = new PDFLoader(documentFile, {
-        splitPages: false,
-      });
-    } else if (file_type === "text/plain") {
-      loader = new TextLoader(documentFile);
-    } else {
-      return NextResponse.json(
-        { error: "Unsupported file type" },
-        { status: 400 }
-      );
-    }
-    const docs = await loader.load();
+    // Load dan split dokumen jadi array chunk teks
+    const chunks = await loadAndSplitDocument(documentFile, file_type);
+
+    // Dapatkan embedder
     const model = await getModel();
 
-    for (const doc of docs) {
-      const splitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 1000,
-        chunkOverlap: 200,
-        separators: ["\n\n", "\n", " ", ""],
-      });
-      const documentChunks = await splitter.splitText(doc.pageContent);
+    // Upload dalam batch ke Pinecone
+    const index = pinecone.index("va").namespace("syaki");
+    let batchIndex = 0;
+    const batchSize = 10;
 
-      let chunkBatchIndex = 0;
-      while (documentChunks.length > 0) {
-        chunkBatchIndex++;
-        const chunkBatch = documentChunks.splice(0, 10);
-        const embeddingsBatch = await model.embedDocuments(
-          chunkBatch.map((str) => str.replace(/\n/g, " "))
-        );
-        // console.log(`Embeddings batch ${embeddingsBatch} created.`);
+    while (chunks.length > 0) {
+      const chunkBatch = chunks.splice(0, batchSize);
+      const embeddings = await model.embedDocuments(
+        chunkBatch.map((text) => text.replace(/\n/g, " "))
+      );
 
-        let vectorBatch = [];
+      const vectors = chunkBatch.map((chunk, i) => ({
+        id: `chunk-${Date.now()}-${batchIndex}-${i}`,
+        values: embeddings[i],
+        metadata: {
+          text: chunk,
+          file_name,
+          file_type,
+          file_size,
+          category: JSON.parse(category),
+          user_id: userId,
+        },
+      }));
 
-        for (let i = 0; i < chunkBatch.length; i++) {
-          const chunk = chunkBatch[i];
-          const embedding = embeddingsBatch[i];
-
-          const vector = {
-            id: `chunk-${i}-${Date.now()}-${chunkBatchIndex}`,
-            values: embedding,
-            metadata: {
-              text: chunk,
-              file_name,
-              file_type,
-              file_size,
-              category: JSON.parse(category),
-              user_id: userId,
-            },
-          };
-          vectorBatch.push(vector);
-        }
-        const index = pinecone.index("va").namespace("syaki");
-
-        await index.upsert(vectorBatch);
-        console.log(
-          `Batch ${chunkBatchIndex} successfully uploaded to Pinecone.`
-        );
-      }
+      await index.upsert(vectors);
+      batchIndex++;
     }
 
+    // Simpan metadata ke database
     const document = await prisma.document.create({
       data: {
         nama,
@@ -181,4 +154,44 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * Load dan split dokumen (pdf / txt) menjadi array chunk teks.
+ * @param blob - Blob file dari form
+ * @param fileType - MIME type file
+ * @returns Array chunk teks
+ */
+export async function loadAndSplitDocument(
+  blob: Blob,
+  fileType: string
+): Promise<string[]> {
+  // Konfigurasi text splitter
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 1200,
+    chunkOverlap: 200,
+    separators: ["\n\n", "\n", ".", " ", ""],
+  });
+
+  if (fileType === "application/pdf") {
+    const loader = new PDFLoader(blob, { splitPages: false });
+    const docs = await loader.load();
+
+    // Gabungkan semua konten halaman jika ada lebih dari 1
+    const fullText = docs.map((d) => d.pageContent).join("\n\n");
+    return await splitter.splitText(fullText);
+  }
+
+  if (fileType === "text/plain") {
+    const text = await blob.text();
+    const cleanedText = text
+      .replace(/\r\n/g, "\n")
+      .replace(/[ \t]+\n/g, "\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+
+    return await splitter.splitText(cleanedText);
+  }
+
+  throw new Error("Unsupported file type for splitting");
 }

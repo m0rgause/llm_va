@@ -58,6 +58,7 @@ export default function ChatTopbar({
   }, []);
 
   const handleModelChange = (model: string) => {
+    model = "llama3.2";
     setSelectedModel(model);
     setOpen(false);
   };
@@ -68,7 +69,7 @@ export default function ChatTopbar({
 
   return (
     <div className="w-full flex px-4 py-6 items-center justify-between lg:justify-center ">
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+      {/* <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetTrigger>
           <HamburgerMenuIcon className="lg:hidden w-5 h-5" />
         </SheetTrigger>
@@ -81,9 +82,9 @@ export default function ChatTopbar({
             closeSidebar={handleCloseSidebar}
           />
         </SheetContent>
-      </Sheet>
+      </Sheet> */}
 
-      <Popover open={open} onOpenChange={setOpen}>
+      {/* <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             disabled={isLoading}
@@ -116,7 +117,7 @@ export default function ChatTopbar({
             </Button>
           )}
         </PopoverContent>
-      </Popover>
+      </Popover> */}
     </div>
   );
 }

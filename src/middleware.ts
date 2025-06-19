@@ -1,12 +1,16 @@
-import { getToken } from "next-auth/jwt";
+// import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { auth } from "./auth";
 
 export async function middleware(request: NextRequest) {
-  const token = await getToken({
-    req: request,
-    secret: process.env.AUTH_SECRET,
-  });
+  // const token = await getToken({
+  //   req: request,
+  //   secret: process.env.AUTH_SECRET,
+  // });
+
+  // console.log("Middleware token:", token);
+  const token = await auth();
 
   const { pathname } = request.nextUrl;
 
@@ -26,7 +30,7 @@ export async function middleware(request: NextRequest) {
   // admin only routes
   if (
     pathname.startsWith("/administrator") &&
-    token?.role !== "administrator"
+    token?.user.role !== "administrator"
   ) {
     return NextResponse.redirect(new URL("/dashboard/semester", request.url));
   }

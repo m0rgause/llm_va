@@ -1,6 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
+  headers() {
+    return [
+      {
+        source: "/api/chat",
+        headers: [
+          {
+            key: "Keep-Alive",
+            value: "timeout=600", // tunggu 10 menit
+          },
+        ],
+      },
+    ];
+  },
 
   webpack: (config, { isServer }) => {
     // Fixes npm packages that depend on `fs` module

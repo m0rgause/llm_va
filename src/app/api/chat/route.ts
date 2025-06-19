@@ -1,10 +1,17 @@
 import { createOllama } from "ollama-ai-provider";
 import { streamText, convertToCoreMessages, UserContent } from "ai";
 import { PromptTemplate } from "@langchain/core/prompts";
-export const runtime = "edge";
+// export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  const abortController = new AbortController();
+
+  req.signal.addEventListener("abort", () => {
+    console.log("❌ Client aborted the request.");
+    abortController.abort();
+  });
+
   const { messages, selectedModel, data } = await req.json();
 
   const ollamaUrl = process.env.OLLAMA_URL;
@@ -16,10 +23,11 @@ export async function POST(req: Request) {
   let retrievedContent = "";
   let relevanceScore = 0;
   try {
-    const retrievedData = await retrieveFromPinecone(currentMessage.content);
+    const retrievedData = await retrieveFromPinecone(
+      normalizeText(currentMessage.content)
+    );
 
     if (retrievedData.length > 0) {
-      // relevanceScore = retrievedData.map((item: any) => item.score);
       retrievedContent = retrievedData
         .slice(0, 3)
         .map(
@@ -32,36 +40,39 @@ export async function POST(req: Request) {
   }
 
   const prompt = PromptTemplate.fromTemplate(`
-You are a knowledgeable and friendly virtual assistant for University of SyaKi. Your task is to assist users by providing clear, natural, and semi-formal answers about the university, including academic programs, administrative procedures, and campus events. Always use polite, friendly, and natural-sounding language, similar to how a university staff or senior student would talk when helping others. Avoid robotic or overly rigid phrasing, and do not use excessive spacing or bullet lists unless it's absolutely necessary for clarity. If providing a list, it should be formatted smoothly in paragraph form without bullets. If the user asks for a list of courses, display the information in a neat table format. If the retrieved context contains relevant information to answer the question, use only that information to form your answer. Do not make up answers or pull from general knowledge. If the context does not provide the needed answer, respond with: "Maaf, saya tidak memiliki informasi tentang hal tersebut."
-
-Retrieved Context:
+== Context ==
 {retrieved_content}
 
-User Input:
+== User Input ==
 {user_input}
 
-Answer:
+== Response ==
 `);
 
   const formattedPrompt = await prompt.format({
     retrieved_content: retrievedContent,
-    user_input: currentMessage.content,
+    user_input: normalizeText(currentMessage.content),
   });
-  console.log("Formatted Prompt:", formattedPrompt);
+
+  // console.log("Formatted Prompt:", formattedPrompt);
 
   const result = streamText({
-    model: ollama("llama3.1"),
+    model: ollama("syaki-ai"),
     messages: [
       ...convertToCoreMessages(initialMessages),
       { role: "user", content: formattedPrompt },
     ],
-    temperature: 0.3,
+    abortSignal: abortController.signal,
+    temperature: 0.2,
+    maxTokens: 1024,
   });
 
   return result.toDataStreamResponse();
 }
 
 async function retrieveFromPinecone(query: string) {
+  console.log("Starting Pinecone retrieval...");
+  const startTime = Date.now();
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/retrieve`, {
     method: "POST",
     headers: {
@@ -71,9 +82,50 @@ async function retrieveFromPinecone(query: string) {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to retrieve data from Pinecone");
+    throw new Error(
+      `Failed to retrieve data from Pinecone: ${response.statusText}`
+    );
   }
 
   const data = await response.json();
+  const endTime = Date.now();
+  console.log(`Pinecone retrieval finished in ${endTime - startTime}ms`);
   return data.results || [];
 }
+
+const normalizeText = (text: string) => {
+  const dictionary = {
+    TA: "tugas akhir",
+    Metopen: "metodologi penelitian",
+    PA: "pembimbing akademik",
+    BNSP: "badan nasional sertifikasi profesi",
+    SIA: "sistem informasi akademik",
+    MKCU: "mata kuliah catur umum",
+    MKWP: "mata kuliah wajib prodi",
+    PKM: "program kreativitas mahasiswa",
+    MBKM: "Merdeka Belajar Kampus Merdeka",
+    MSIB: "Magang dan Studi Independen Bersertifikat",
+    KP: "Kerja Praktek",
+    SKS: "Satuan Kredit Semester",
+  };
+
+  // if the text contains any of the keys in the dictionary, replace it with the corresponding value
+  for (let [key, value] of Object.entries(dictionary)) {
+    // lowercase the text and value for case-insensitive replacement
+    key = key.toLowerCase();
+    value = value.toLowerCase();
+    text = text.toLowerCase();
+
+    const regex = new RegExp(`\\b${key}\\b`, "gi");
+    text = text.replace(regex, value);
+  }
+
+  // Normalize spaces and remove extra spaces
+  text = text
+    .replace(/\s+/g, " ") // Replace multiple spaces with a single space
+    .trim(); // Trim leading and trailing spaces
+
+  console.log("Normalized text:", text);
+
+  return text;
+};

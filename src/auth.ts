@@ -70,6 +70,6 @@ export const providerMap = providers
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(prisma) as Adapter,
+  // adapter: PrismaAdapter(prisma) as Adapter,
   providers,
 });

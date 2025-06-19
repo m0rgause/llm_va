@@ -82,6 +82,8 @@ const SemesterForm: React.FC<SemesterFormProps> = ({
     setTimeout(() => {
       onAlert({ message: "", type: "" });
     }, 5000);
+    // reload the page to reflect changes
+    window.location.reload();
   };
 
   return (

@@ -1,5 +1,4 @@
 import { Pinecone as PineconeClient } from "@pinecone-database/pinecone";
-import { OllamaEmbeddings } from "@langchain/ollama";
 import { NextResponse } from "next/server";
 import { getModel } from "@/utils/model";
 export const runtime = "nodejs";
@@ -21,14 +20,12 @@ export async function POST(req: Request) {
 
     const results = await index.query({
       vector: queryEmbedding,
-      topK: 15,
+      topK: 3,
       includeMetadata: true,
     });
 
-    // filter hasil dengan score di atas 0.5
-    // Filter hasil dengan score yang memadai
     const filteredResults = results.matches.filter(
-      (match) => (match.score ?? 0) >= 0.7
+      (match) => (match.score ?? 0) >= 0.6
     );
 
     const formattedResults = filteredResults.map((match) => ({
