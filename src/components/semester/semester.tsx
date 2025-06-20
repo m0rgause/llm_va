@@ -185,7 +185,7 @@ export default function SemesterLayout() {
           </label>
         </div>
 
-        <div className="relative overflow-x-auto shadow-md sm:rounded">
+        <div className="relative overflow-x-auto dark:shadow-md sm:rounded">
           <table className="w-full text-sm text-left rtl:text-right">
             <thead>
               <tr className=" text-gray-700 uppercase bg-gray-50 bg-accent dark:bg-[#1D1D1F] dark:text-gray-400 dark:border-gray-700 border-gray-200">
@@ -245,7 +245,7 @@ export default function SemesterLayout() {
                     >
                       <button
                         type="submit"
-                        className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                        className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700 hover:border-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-700 dark:border-red-700 dark:hover:bg-red-800 dark:hover:border-red-800 dark:focus:ring-red-900"
                         title="Hapus Semester"
                         onClick={(e) => {
                           if (
@@ -257,7 +257,7 @@ export default function SemesterLayout() {
                           }
                         }}
                       >
-                        <TrashIcon className="w-5 h-5" />
+                        Hapus
                       </button>
                     </form>
                   </td>

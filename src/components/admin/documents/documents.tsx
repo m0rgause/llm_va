@@ -149,7 +149,7 @@ export default function Documents() {
           </Dialog>
         </div>
 
-        <div className="relative overflow-x-auto shadow-md sm:rounded">
+        <div className="relative overflow-x-auto dark:shadow-md sm:rounded">
           <table className="w-full text-sm text-left rtl:text-right">
             <thead>
               <tr className=" text-gray-700 uppercase bg-gray-50 bg-accent dark:bg-[#1D1D1F] dark:text-gray-400 dark:border-gray-700 border-gray-200">

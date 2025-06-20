@@ -120,8 +120,8 @@ export default function Signin(props: Props) {
           src="/ollama.png"
           alt="logo"
           className="w-20 mx-auto mb-4"
-          width={30}
-          height={30}
+          width={100}
+          height={100}
         />
         <h1 className="text-2xl font-semibold  text-center">Loading...</h1>
       </div>
@@ -134,8 +134,8 @@ export default function Signin(props: Props) {
           src="/ollama.png"
           alt="logo"
           className="w-20 mx-auto mb-4"
-          width={30}
-          height={30}
+          width={100}
+          height={100}
         />
         <h1 className="text-2xl font-semibold  text-center">Login</h1>
 

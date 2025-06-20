@@ -1,6 +1,7 @@
 import { createOllama } from "ollama-ai-provider";
 import { generateText, convertToCoreMessages } from "ai"; // Mengubah streamText menjadi generateText
 import { PromptTemplate } from "@langchain/core/prompts";
+import { formatTime } from "@/lib/utils";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -13,16 +14,6 @@ export async function POST(req: Request) {
     query: string;
     kelas: any;
   } = await req.json();
-
-  // convert kelas to messages
-  const formatTime = (date: string) => {
-    const dateObj = new Date(date);
-    const hours = dateObj.getUTCHours();
-    const minutes = dateObj.getUTCMinutes();
-    const amPm = hours < 12 ? "AM" : "PM";
-    const formattedHours = hours % 12 || 12; // Convert to 12-hour format
-    return `${formattedHours}:${minutes.toString().padStart(2, "0")} ${amPm}`;
-  };
 
   const messages: { role: "user"; content: string }[] = [
     {
@@ -60,7 +51,7 @@ export async function POST(req: Request) {
   // }
 
   const prompt = PromptTemplate.fromTemplate(`
-You are a knowledgeable and friendly virtual assistant for University of SyaKi. Your task is to assist users by reminding students about their upcoming classes in a clear, natural, and semi-formal manner. Always use polite, friendly, and natural-sounding language, similar to how a university staff or senior student would talk when helping others. Avoid robotic or overly rigid phrasing, no need to comment on what the class is about, just focus on the reminder.
+avoid robotic or overly rigid phrasing, no need to comment on what the class is about, just focus on the reminder.
 It will be sent to students via WhatsApp, so please use the following markdown formatting:
 - For bold text, use asterisks: *bold text*
 - For italic text, use underscores: _italic text_
@@ -84,7 +75,7 @@ Answer:
 
   // Menggunakan generateText untuk mendapatkan hasil lengkap
   const result = await generateText({
-    model: ollama("llama3.1"),
+    model: ollama("syaki-ai"),
     messages: [
       ...convertToCoreMessages(initialMessages),
       { role: "user", content: formattedPrompt },

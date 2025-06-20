@@ -86,7 +86,7 @@ export function Sidebar({
             }
           }}
           variant="ghost"
-          className="flex justify-between w-full h-14 text-sm xl:text-lg font-normal items-center "
+          className="flex justify-between w-full h-14 text-sm xl:text-lg font-normal items-center bg-accent/90 dark:bg-secondary/80"
         >
           <div className="flex gap-3 items-center ">
             {!isCollapsed && !isMobile && (
@@ -95,10 +95,10 @@ export function Sidebar({
                 alt="AI"
                 width={28}
                 height={28}
-                className="dark:invert hidden 2xl:block"
+                className=" hidden 2xl:block"
               />
             )}
-            New chat
+            Chat Baru
           </div>
           <SquarePen size={18} className="shrink-0 w-4 h-4" />
         </Button>
@@ -159,9 +159,9 @@ export function Sidebar({
         </div>
 
         <div className="flex flex-col pt-10 gap-2">
-          <p className="pl-4 text-xs font-extrabold">Your chats</p>
+          <p className="pl-4 text-xs font-extrabold">History Chat</p>
           <Suspense fallback>
-            {chats &&
+            {chats ? (
               Object.entries(chats)
                 .sort(
                   ([, a], [, b]) =>
@@ -238,7 +238,14 @@ export function Sidebar({
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </Link>
-                ))}
+                ))
+            ) : (
+              <div className="flex justify-center items-center h-10">
+                <span className="text-sm text-muted-foreground">
+                  No chats available
+                </span>
+              </div>
+            )}
           </Suspense>
         </div>
       </div>
