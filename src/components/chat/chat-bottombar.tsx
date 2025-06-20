@@ -96,18 +96,9 @@ export default function ChatBottombar({
           <div className="flex w-full items-center p-2">
             {isLoading ? (
               // Loading state
-              <div className="flex w-full justify-between">
-                <MultiImagePicker disabled onImagesPick={setBase64Images} />
+              <div className="flex w-full justify-end">
+                {/* <MultiImagePicker disabled onImagesPick={setBase64Images} /> */}
                 <div>
-                  <Button
-                    className="shrink-0 rounded-full"
-                    variant="ghost"
-                    size="icon"
-                    type="button"
-                    disabled
-                  >
-                    <Mic className="w-5 h-5" />
-                  </Button>
                   <Button
                     className="shrink-0 rounded-full"
                     variant="ghost"

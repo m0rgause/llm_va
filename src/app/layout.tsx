@@ -8,8 +8,7 @@ import SessionWrapper from "@/components/session-wrapper";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Ollama UI",
-  description: "Ollama chatbot web interface",
+  title: "SyaKi - Virtual Assistant",
 };
 
 export default function RootLayout({

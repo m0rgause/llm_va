@@ -197,6 +197,11 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
       clearTimeout(fetchTimeoutRef.current);
       fetchTimeoutRef.current = null;
     }
+    // abort the ongoing fetch request
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+      controllerRef.current = null; // Clear the controller reference
+    }
     saveMessages(id, [...messages]);
     setLoadingSubmit(false);
     setCustomUiError("Chat stopped by user."); // Indicate user stop
