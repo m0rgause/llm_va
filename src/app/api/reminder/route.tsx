@@ -8,7 +8,6 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   const {
-    query,
     kelas,
   }: {
     query: string;
@@ -35,20 +34,6 @@ export async function POST(req: Request) {
   const ollama = createOllama({ baseURL: `${ollamaUrl}/api` });
 
   let retrievedContent = "";
-  // try {
-  //   // const retrievedData = await retrieveFromPinecone(currentMessage.content);
-
-  //   if (retrievedData.length > 0) {
-  //     retrievedContent = retrievedData
-  //       .slice(0, 3)
-  //       .map(
-  //         (item: any) => `[Relevansi: ${item.score.toFixed(2)}] ${item.text}`
-  //       )
-  //       .join("\n\n---\n\n");
-  //   }
-  // } catch (error) {
-  //   console.error("Error retrieving data from Pinecone:", error);
-  // }
 
   const prompt = PromptTemplate.fromTemplate(`
 avoid robotic or overly rigid phrasing, no need to comment on what the class is about, just focus on the reminder.
@@ -80,7 +65,6 @@ Answer:
       ...convertToCoreMessages(initialMessages),
       { role: "user", content: formattedPrompt },
     ],
-    temperature: 0.3,
   });
 
   // Mengembalikan respons JSON dengan teks lengkap
@@ -92,21 +76,4 @@ Answer:
       headers: { "Content-Type": "application/json" },
     }
   );
-}
-
-async function retrieveFromPinecone(query: string) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/retrieve`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ query }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to retrieve data from Pinecone");
-  }
-
-  const data = await response.json();
-  return data.results || [];
 }
