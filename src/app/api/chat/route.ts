@@ -1,24 +1,31 @@
 import { createOllama } from "ollama-ai-provider";
-import { streamText, convertToCoreMessages } from "ai";
+import { streamText, convertToCoreMessages, generateText } from "ai";
+import { TextLoader } from "langchain/document_loaders/fs/text";
 import { PromptTemplate } from "@langchain/core/prompts";
-export const runtime = "edge";
-export const dynamic = "force-dynamic";
+import normalizeText from "@/utils/normalize-text";
+import { prisma } from "@/prisma";
+import { auth } from "@/auth";
+import readableUserData from "@/utils/readable-user";
+import intentDetection from "@/utils/intent-detection";
+import retrieveFromPinecone from "@/utils/retrieve-pinecone";
+// export const runtime = "edge";
+// export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   const abortController = new AbortController();
+  const session = await auth();
+  const user = session?.user;
+
+  if (!user) {
+    return new Response("Unauthorized", { status: 401 });
+  }
 
   req.signal.addEventListener("abort", () => {
     console.log("❌ Client aborted the request.");
     abortController.abort();
   });
 
-  let messages, selectedModel, data;
-  try {
-    ({ messages, selectedModel, data } = await req.json());
-  } catch (error) {
-    console.error("Error parsing request JSON:", error);
-    return new Response("Invalid JSON", { status: 400 });
-  }
+  let { messages } = await req.json();
 
   const ollamaUrl = process.env.OLLAMA_URL;
   const initialMessages = messages.slice(0, -1);
@@ -26,43 +33,80 @@ export async function POST(req: Request) {
 
   const ollama = createOllama({ baseURL: `${ollamaUrl}/api` });
 
-  let retrievedContent = "";
-  let relevanceScore = 0;
-  try {
-    const retrievedData = await retrieveFromPinecone(
-      normalizeText(currentMessage.content)
-    );
+  const currentMessageContent = normalizeText(currentMessage.content);
 
-    if (retrievedData.length > 0) {
-      retrievedContent = retrievedData
-        .slice(0, 3)
-        .map(
-          (item: any) => `[Relevansi: ${item.score.toFixed(2)}] ${item.text}`
-        )
-        .join("\n\n---\n\n");
-    }
-  } catch (error) {
-    console.error("Error retrieving data from Pinecone:", error);
-  }
+  // Intent detection
+  const intent = await intentDetection(
+    normalizeText(currentMessageContent),
+    ollama
+  );
+
+  const user_data = await prisma.user.findFirst({
+    where: { id: user.id },
+    select: {
+      nama: true,
+      semester: {
+        select: {
+          nama: true,
+          kelas: true,
+        },
+      },
+      no_whatsapp: true,
+    },
+  });
+  const user_data_str = readableUserData(user_data);
 
   let formattedPrompt = "";
-  try {
-    const prompt = PromptTemplate.fromTemplate(`
-== Context ==
-{retrieved_content}
+  if (intent == "Memilih Mata Kuliah Semester Selanjutnya") {
+    // get context from docs folder
+    const loader = new TextLoader("./docs/mata kuliah.txt");
+    const docs = (await loader.load())[0].pageContent;
 
-== User Input ==
-{user_input}
+    const promptTemplate = PromptTemplate.fromTemplate(`
+      The user wants to choose courses for the next semester.
+      The context is about curriculum and courses data.
+      Compare the curriculum and course data in the context with the user data.
 
-== Response ==
-`);
-    formattedPrompt = await prompt.format({
-      retrieved_content: retrievedContent,
-      user_input: normalizeText(currentMessage.content),
+      == Context ==
+      {retrieved_content}
+
+      == User Data ==
+      {user_data}
+
+      Based on this, suggest courses the user can take next semester, considering their current semester and class, also considering prerequisites and total SKS.
+      Avoid repeating courses they have already taken.
+      == User Input ==
+      {user_input}
+
+      == Response ==
+      `);
+    formattedPrompt = await promptTemplate.format({
+      retrieved_content: docs,
+      user_input: currentMessageContent,
+      user_data: user_data_str,
     });
-  } catch (error) {
-    console.error("Error formatting prompt:", error);
-    return new Response("Prompt formatting error", { status: 500 });
+  } else {
+    const retrievedContent = await retrieveFromPinecone(
+      normalizeText(currentMessageContent)
+    );
+    const promptTemplate = PromptTemplate.fromTemplate(`
+  == Retrieved Context ==
+  {retrieved_content}
+
+  == User Data ==
+  {user_data}
+
+  == User Input ==
+  {user_input}
+
+  == Response ==
+  `);
+
+    formattedPrompt = await promptTemplate.format({
+      retrieved_content: retrievedContent,
+      user_input: currentMessageContent,
+      user_data: user_data_str,
+    });
   }
 
   let result;
@@ -74,7 +118,6 @@ export async function POST(req: Request) {
         { role: "user", content: formattedPrompt },
       ],
       abortSignal: abortController.signal,
-      temperature: 0.2,
       maxTokens: 1024,
     });
   } catch (error) {
@@ -89,75 +132,3 @@ export async function POST(req: Request) {
     return new Response("Stream response error", { status: 500 });
   }
 }
-
-async function retrieveFromPinecone(query: string) {
-  console.log("Starting Pinecone retrieval...");
-  const startTime = Date.now();
-  let response;
-  try {
-    response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/retrieve`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ query }),
-    });
-  } catch (error) {
-    console.error("Fetch error in retrieveFromPinecone:", error);
-    throw error;
-  }
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to retrieve data from Pinecone: ${response.statusText}`
-    );
-  }
-
-  let data;
-  try {
-    data = await response.json();
-  } catch (error) {
-    console.error("Error parsing Pinecone response JSON:", error);
-    throw error;
-  }
-  const endTime = Date.now();
-  console.log(`Pinecone retrieval finished in ${endTime - startTime}ms`);
-  return data.results || [];
-}
-
-const normalizeText = (text: string) => {
-  const dictionary = {
-    TA: "tugas akhir",
-    Metopen: "metodologi penelitian",
-    PA: "pembimbing akademik",
-    BNSP: "badan nasional sertifikasi profesi",
-    SIA: "sistem informasi akademik",
-    MKCU: "mata kuliah catur umum",
-    MKWP: "mata kuliah wajib prodi",
-    PKM: "program kreativitas mahasiswa",
-    MBKM: "Merdeka Belajar Kampus Merdeka",
-    MSIB: "Magang dan Studi Independen Bersertifikat",
-    KP: "Kerja Praktek",
-    SKS: "Satuan Kredit Semester",
-  };
-
-  // if the text contains any of the keys in the dictionary, replace it with the corresponding value
-  for (let [key, value] of Object.entries(dictionary)) {
-    // lowercase the text and value for case-insensitive replacement
-    key = key.toLowerCase();
-    value = value.toLowerCase();
-    text = text.toLowerCase();
-
-    const regex = new RegExp(`\\b${key}\\b`, "gi");
-    text = text.replace(regex, value);
-  }
-
-  // Normalize spaces and remove extra spaces
-  text = text
-    .replace(/\s+/g, " ") // Replace multiple spaces with a single space
-    .trim(); // Trim leading and trailing spaces
-
-  console.log("Normalized text:", text);
-
-  return text;
-};
