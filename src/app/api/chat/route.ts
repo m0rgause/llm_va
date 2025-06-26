@@ -1,5 +1,5 @@
 import { createOllama } from "ollama-ai-provider";
-import { streamText, convertToCoreMessages, generateText } from "ai";
+import { streamText, convertToCoreMessages } from "ai";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { PromptTemplate } from "@langchain/core/prompts";
 import normalizeText from "@/utils/normalize-text";
@@ -8,8 +8,6 @@ import { auth } from "@/auth";
 import readableUserData from "@/utils/readable-user";
 import intentDetection from "@/utils/intent-detection";
 import retrieveFromPinecone from "@/utils/retrieve-pinecone";
-// export const runtime = "edge";
-// export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   const abortController = new AbortController();
@@ -36,10 +34,7 @@ export async function POST(req: Request) {
   const currentMessageContent = normalizeText(currentMessage.content);
 
   // Intent detection
-  const intent = await intentDetection(
-    normalizeText(currentMessageContent),
-    ollama
-  );
+  const intent = await intentDetection(currentMessageContent, ollama);
 
   const user_data = await prisma.user.findFirst({
     where: { id: user.id },

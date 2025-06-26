@@ -12,7 +12,7 @@ const readableUserData = (userData: any) => {
           kelas.hari
         }, ${formatTime(kelas.waktu_mulai)} - ${formatTime(
           kelas.waktu_selesai
-        )}), Ruangan: ${kelas.ruang}}, Dosen: ${kelas.dosen}\n`;
+        )}), Ruangan: ${kelas.ruang}, Dosen: ${kelas.dosen}\n`;
       }
     } else {
       data += "- Kelas: Tidak ada kelas terdaftar.\n";

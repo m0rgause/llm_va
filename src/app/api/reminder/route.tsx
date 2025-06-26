@@ -44,9 +44,6 @@ It will be sent to students via WhatsApp, so please use the following markdown f
 - For monospace, use three backticks on both sides: \`\`\`monospace text\`\`\`
 - For inline code, use single backticks: \`inline code\`
 
-Retrieved Context:
-{retrieved_content}
-
 User Input:
 {user_input}
 
@@ -54,15 +51,14 @@ Answer:
 `);
 
   const formattedPrompt = await prompt.format({
-    retrieved_content: retrievedContent,
     user_input: currentMessage.content,
   });
 
   // Menggunakan generateText untuk mendapatkan hasil lengkap
   const result = await generateText({
-    model: ollama("syaki-ai"),
+    model: ollama("gemma3:1b"),
     messages: [
-      ...convertToCoreMessages(initialMessages),
+      // ...convertToCoreMessages(initialMessages),
       { role: "user", content: formattedPrompt },
     ],
   });
