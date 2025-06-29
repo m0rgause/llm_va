@@ -7,11 +7,7 @@ import { ChatRequestOptions } from "ai";
 import { CheckIcon, CopyIcon } from "@radix-ui/react-icons";
 import { RefreshCcw } from "lucide-react";
 import Image from "next/image";
-import {
-  ChatBubble,
-  ChatBubbleAvatar,
-  ChatBubbleMessage,
-} from "../ui/chat/chat-bubble";
+import { ChatBubble, ChatBubbleMessage } from "../ui/chat/chat-bubble";
 import ButtonWithTooltip from "../button-with-tooltip";
 import { Button } from "../ui/button";
 import CodeDisplayBlock from "../code-display-block";
@@ -150,17 +146,12 @@ function ChatMessage({ message, isLast, isLoading, reload }: ChatMessageProps) {
       className="flex flex-col gap-2 whitespace-pre-wrap"
     >
       <ChatBubble variant={message.role === "user" ? "sent" : "received"}>
-        <ChatBubbleAvatar
-          src={message.role === "assistant" ? "/ollama.png" : ""}
-          width={6}
-          height={6}
-          className="object-contain dark:invert"
-          fallback={message.role === "user" ? "US" : ""}
-        />
         <ChatBubbleMessage>
           {renderThinkingProcess()}
           {renderAttachments()}
-          {renderContent()}
+          <article className="prose dark:prose-invert prose-sm max-w-none text-[18px]">
+            {renderContent()}
+          </article>
           {renderActionButtons()}
         </ChatBubbleMessage>
       </ChatBubble>

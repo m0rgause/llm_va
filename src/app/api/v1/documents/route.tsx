@@ -5,7 +5,7 @@ import { TextLoader } from "langchain/document_loaders/fs/text";
 import { prisma } from "@/prisma";
 import { Prisma } from "@prisma/client";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { getModel } from "@/utils/model";
+import { embeddingMany } from "@/utils/model";
 
 export async function GET(request: NextRequest) {
   // get query parameters, and make it paginated
@@ -104,7 +104,6 @@ export async function POST(request: NextRequest) {
     const chunks = await loadAndSplitDocument(documentFile, file_type);
 
     // Dapatkan embedder
-    const model = await getModel();
 
     // Upload dalam batch ke Pinecone
     const index = pinecone.index("va").namespace("syaki");
@@ -113,7 +112,7 @@ export async function POST(request: NextRequest) {
 
     while (chunks.length > 0) {
       const chunkBatch = chunks.splice(0, batchSize);
-      const embeddings = await model.embedDocuments(
+      const embeddings = await embeddingMany(
         chunkBatch.map((text) => text.replace(/\n/g, " "))
       );
 

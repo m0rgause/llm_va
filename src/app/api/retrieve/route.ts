@@ -1,6 +1,6 @@
+import { embedding } from "@/utils/model";
 import { Pinecone as PineconeClient } from "@pinecone-database/pinecone";
 import { NextResponse } from "next/server";
-import { getModel } from "@/utils/model";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -14,9 +14,8 @@ const index = pinecone.index("va").namespace("syaki");
 export async function POST(req: Request) {
   try {
     const { query } = await req.json();
-    const model = await getModel();
 
-    const queryEmbedding = await model.embedQuery(query);
+    const queryEmbedding = await embedding(query);
 
     const results = await index.query({
       vector: queryEmbedding,

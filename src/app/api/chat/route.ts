@@ -1,5 +1,5 @@
-import { createOllama } from "ollama-ai-provider";
-import { streamText, convertToCoreMessages } from "ai";
+import { google } from "@ai-sdk/google";
+import { streamText, convertToCoreMessages, generateText } from "ai";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { PromptTemplate } from "@langchain/core/prompts";
 import normalizeText from "@/utils/normalize-text";
@@ -25,16 +25,13 @@ export async function POST(req: Request) {
 
   let { messages } = await req.json();
 
-  const ollamaUrl = process.env.OLLAMA_URL;
   const initialMessages = messages.slice(0, -1);
   const currentMessage = messages[messages.length - 1];
-
-  const ollama = createOllama({ baseURL: `${ollamaUrl}/api` });
 
   const currentMessageContent = normalizeText(currentMessage.content);
 
   // Intent detection
-  const intent = await intentDetection(currentMessageContent, ollama);
+  const intent = await intentDetection(currentMessageContent, google);
 
   const user_data = await prisma.user.findFirst({
     where: { id: user.id },
@@ -62,6 +59,17 @@ export async function POST(req: Request) {
       The context is about curriculum and courses data.
       Compare the curriculum and course data in the context with the user data.
 
+      == Output Control ==
+      - Always respond in a deterministic style—avoid randomness.
+      - Use Markdown formatting for lists, tables, or structured data.
+      - Do not include greetings (e.g., "Halo") or closings (e.g., "Terima kasih").
+      - Avoid using overly long introductory phrases. Focus on delivering steps or answers directly
+
+      == Behavior Rules ==
+      - Only respond using the information available in the retrieved context or user data. Do not guess, assume, or fabricate answers.
+      - If the user’s question includes abbreviations (e.g., TA, Metopen, BNSP), always expand the abbreviation on first use before continuing the explanation. Example: "TA (Tugas Akhir)".
+      - Avoid repeating the user’s question unless needed for clarity.
+
       == Context ==
       {retrieved_content}
 
@@ -85,6 +93,20 @@ export async function POST(req: Request) {
       normalizeText(currentMessageContent)
     );
     const promptTemplate = PromptTemplate.fromTemplate(`
+  You are a helpful, friendly, and context-aware virtual assistant for Universitas SyaKi. Your role is to assist users by answering questions related to academic matters, administrative procedures, and campus activities, using the retrieved context and student/user data provided to you.
+  Always respond in clear, semi-formal Indonesian, as if you are a senior student or academic staff helping a fellow student. Use polite and natural-sounding language. Avoid robotic, overly formal, or excessively casual expressions.
+
+  == Output Control ==
+- Always respond in a deterministic style—avoid randomness.
+- Use Markdown formatting for lists, tables, or structured data.
+- Do not include greetings (e.g., "Halo") or closings (e.g., "Terima kasih").
+- Avoid using overly long introductory phrases. Focus on delivering steps or answers directly
+
+== Behavior Rules ==
+- Only respond using the information available in the retrieved context or user data. Do not guess, assume, or fabricate answers.
+- If the user’s question includes abbreviations (e.g., TA, Metopen, BNSP), always expand the abbreviation on first use before continuing the explanation. Example: "TA (Tugas Akhir)".
+- Avoid repeating the user’s question unless needed for clarity.
+
   == Retrieved Context ==
   {retrieved_content}
 
@@ -107,7 +129,7 @@ export async function POST(req: Request) {
   let result;
   try {
     result = streamText({
-      model: ollama("syaki-ai"),
+      model: google("gemini-2.0-flash"),
       messages: [
         ...convertToCoreMessages(initialMessages),
         { role: "user", content: formattedPrompt },

@@ -1,5 +1,6 @@
 import { generateText } from "ai";
 import { PromptTemplate } from "@langchain/core/prompts";
+import { google } from "@ai-sdk/google";
 
 const intentDetection = async (input_user: string, ollama: any) => {
   const promptIntent = PromptTemplate.fromTemplate(`
@@ -44,7 +45,7 @@ const intentDetection = async (input_user: string, ollama: any) => {
   });
 
   const intentResult = await generateText({
-    model: ollama("gemma3:1b"),
+    model: google("gemma-3-27b-it"),
     messages: [{ role: "user", content: formattedPromptIntent }],
     maxTokens: 50,
     temperature: 0.2,

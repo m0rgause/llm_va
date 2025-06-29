@@ -4,7 +4,8 @@ import ChatTopbar from "./chat-topbar";
 import ChatList from "./chat-list";
 import ChatBottombar from "./chat-bottombar";
 import { Attachment, ChatRequestOptions, generateId } from "ai";
-import { Message, useChat } from "ai/react";
+// import { Message, useChat } from "ai/react";
+import { useChat, Message } from "@ai-sdk/react";
 import React, { useEffect, useRef, useState } from "react";
 import useChatStore from "@/app/hooks/useChatStore";
 import { useRouter } from "next/navigation";
@@ -31,7 +32,6 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
     setMessages,
     setInput,
     reload,
-    error: chatError, // Rename to avoid conflict with local `error` state
   } = useChat({
     id,
     initialMessages,
@@ -208,13 +208,13 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
   };
 
   return (
-    <div className="flex flex-col w-full max-w-3xl h-full">
-      <ChatTopbar
+    <div className="flex flex-col w-full max-w-4xl h-full">
+      {/* <ChatTopbar
         isLoading={isLoading}
         chatId={id}
         messages={messages}
         setMessages={setMessages}
-      />
+      /> */}
 
       {messages.length === 0 ? (
         <div className="flex flex-col h-full w-full items-center gap-4 justify-center">

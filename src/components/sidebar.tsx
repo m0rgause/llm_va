@@ -95,7 +95,7 @@ export function Sidebar({
                 alt="AI"
                 width={28}
                 height={28}
-                className=" hidden 2xl:block"
+                className=" hidden 2xl:block dark:invert"
               />
             )}
             Chat Baru

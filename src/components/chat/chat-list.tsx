@@ -38,12 +38,12 @@ export default function ChatList({
         ))}
         {loadingSubmit && (
           <ChatBubble variant="received">
-            <ChatBubbleAvatar
+            {/* <ChatBubbleAvatar
               src="/ollama.png"
               width={6}
               height={6}
               className="object-contain dark:invert"
-            />
+            /> */}
             <ChatBubbleMessage isLoading />
           </ChatBubble>
         )}

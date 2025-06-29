@@ -145,11 +145,11 @@ export default function Signup() {
         <Image
           src="/ollama.png"
           alt="logo"
-          className="w-20 mx-auto mb-4"
+          className="w-20 mx-auto mb-4 dark:invert"
           width={100}
           height={100}
         />
-        <h1 className="text-2xl font-semibold text-center">Sign Up</h1>
+        {/* <h1 className="text-2xl font-semibold text-center">Sign Up</h1> */}
 
         {/* alert */}
         {(alert.message != "" || alert.type != "") && (
