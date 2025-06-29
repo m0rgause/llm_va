@@ -1,4 +1,4 @@
-import { createOllama } from "ollama-ai-provider";
+import { google } from "@ai-sdk/google";
 import { convertToCoreMessages, generateText } from "ai";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { TextLoader } from "langchain/document_loaders/fs/text";
@@ -15,12 +15,11 @@ export async function POST(req: Request) {
   const initialMessages = messages.slice(0, -1);
   const currentMessage = messages[messages.length - 2];
 
-  const ollama = createOllama({ baseURL: `${ollamaUrl}/api` });
   const currentMessageContent = normalizeText(
     currentMessage.content.replace("!tanya ", "")
   );
 
-  const intent = await intentDetection(currentMessageContent, ollama);
+  const intent = await intentDetection(currentMessageContent, google);
 
   const user_data = readableUserData(userContent);
 
@@ -31,17 +30,53 @@ export async function POST(req: Request) {
     const docs = (await loader.load())[0].pageContent;
 
     const promptTemplate = PromptTemplate.fromTemplate(`
-      The user wants to choose courses for the next semester.
-      the content of the docs is about curriculum and courses offered by the university.
-      your task is to compare the user data with the content of the docs, and give the user a recommendation on which courses to take next semester.
-      Remember, you can offer the previous semester courses if the user has not taken them yet.
-      Here is the content of the docs:
+     You are a helpful, friendly, and context-aware virtual assistant for Universitas SyaKi. Your role is to suggest courses for the next semester based on the user's academic history and the curriculum provided in the context. You can choose either the courses from the previous semester(if the user has not taken them yet) or new courses based on the user's current semester and academic standing.
+      In consentration MKPP, there are 2 consentrations available:
+      - Data Science
+      - Network Solution
+      If the user already on semester 3 or higher, you can ask the user to choose one of the consentrations first.
+
+      == Output Control ==
+      - Always respond in a deterministic style—avoid randomness.
+      - Use Markdown formatting for lists, tables, or structured data.
+
+      == Behavior Rules ==
+      - If the user’s question includes abbreviations (e.g., TA, Metopen, BNSP), always expand the abbreviation on first use before continuing the explanation. Example: "TA (Tugas Akhir)".
+      - Avoid repeating the user’s question unless needed for clarity.
+
+      == Glossary of Abbreviations ==
+- TA      : Tugas Akhir
+- Metopen : Metodologi Penelitian
+- PA      : Pembimbing Akademik
+- BNSP    : Badan Nasional Sertifikasi Profesi
+- SIA     : Sistem Informasi Akademik
+- MKCU    : Mata Kuliah Catur Umum
+- MKCF  : Mata Kuliah Ciri Fakultas,
+- MKPP  : Mata Kuliah Pilihan Prodi,
+- MKWP    : Mata Kuliah Wajib Prodi
+- PKM     : Program Kreativitas Mahasiswa
+- MBKM    : Merdeka Belajar Kampus Merdeka
+- MSIB    : Magang dan Studi Independen Bersertifikat
+- KP      : Kerja Praktek
+- SKS     : Satuan Kredit Semester
+- SKPI    : Surat Keterangan Pendamping Ijazah
+- KRS     : Kartu Rencana Studi
+- KHS     : Kartu Hasil Studi
+- KKN     : Kuliah Kerja Nyata
+- Matkul  : Mata Kuliah
+- MK      : Mata Kuliah
+"""
+
+      == Context ==
       {docs}
-      Here is the user data:
+
+      == User Data ==
       {user_data}
-      Here is the user input:
+
+      == User Input ==
       {user_input}
-      Please provide a concise recommendation for the user.
+
+      == Response ==
       `);
 
     formattedPrompt = await promptTemplate.format({
@@ -53,28 +88,58 @@ export async function POST(req: Request) {
     const retrievedContent = await retrieveFromPinecone(currentMessageContent);
 
     const prompt = PromptTemplate.fromTemplate(`
-      It will be sent to student user via Whatsapp, so please use the following markdown formatting:
-       - Use *bold* for important points.
-       - Use _italics_ for emphasis.
-       - Use \`\`\`monospace\`\`\` for code or technical terms.
-       - Use \`inline code\` for short code snippets.
-       - Use > Blockquotes for quoting text.
-       - Use - bullet points for lists.
-       - Use 1. numbered lists for ordered items.
 
-      if the user ask about his/her own data, you can use the user database to answer it, THIS IS LEGAL because the user database is his/her own data.
+You are a helpful, friendly, and context-aware virtual assistant for Universitas SyaKi. Your role is to assist users by answering questions related to academic matters, administrative procedures, and campus activities, using the retrieved context and student/user data provided to you.
 
-      Retrieved Context:
-      {retrieved_content}
+  == Output Control ==
+- Always respond in a deterministic style—avoid randomness.
+- Use Markdown formatting for lists, tables, or structured data.
+    It will be sent to student user via Whatsapp, so please use the following markdown formatting:
+      - Use *bold* for important points.
+      - Use _italics_ for emphasis.
+      - Use \`\`\`monospace\`\`\` for code or technical terms.
+      - Use \`inline code\` for short code snippets.
+      - Use > Blockquotes for quoting text.
+      - Use - bullet points for lists.
+      - Use 1. numbered lists for ordered items.
+       
 
-      User/Student Database:
-      {user_database}
+== Behavior Rules ==
+- If the user’s question includes abbreviations (e.g., TA, Metopen, BNSP), always expand the abbreviation on first use before continuing the explanation. Example: "TA (Tugas Akhir)".
+- Avoid repeating the user’s question unless needed for clarity.
 
-      User Input:
-      {user_input}
+== Glossary of Abbreviations ==
+- TA      : Tugas Akhir
+- Metopen : Metodologi Penelitian
+- PA      : Pembimbing Akademik
+- BNSP    : Badan Nasional Sertifikasi Profesi
+- SIA     : Sistem Informasi Akademik
+- MKCU    : Mata Kuliah Catur Umum
+- MKCF  : Mata Kuliah Ciri Fakultas,
+- MKPP  : Mata Kuliah Pilihan Prodi,
+- MKWP    : Mata Kuliah Wajib Prodi
+- PKM     : Program Kreativitas Mahasiswa
+- MBKM    : Merdeka Belajar Kampus Merdeka
+- MSIB    : Magang dan Studi Independen Bersertifikat
+- KP      : Kerja Praktek
+- SKS     : Satuan Kredit Semester
+- SKPI    : Surat Keterangan Pendamping Ijazah
+- KRS     : Kartu Rencana Studi
+- KHS     : Kartu Hasil Studi
+- KKN     : Kuliah Kerja Nyata
+- Matkul  : Mata Kuliah
+- MK      : Mata Kuliah
 
-      You have 240 tokens to answer this question, so please be concise and clear.
-      Answer:
+  == Retrieved Context ==
+  {retrieved_content}
+
+  == User Data ==
+  {user_database}
+
+  == User Input ==
+  {user_input}
+
+  == Response ==
     `);
     formattedPrompt = await prompt.format({
       retrieved_content: retrievedContent,
@@ -83,9 +148,8 @@ export async function POST(req: Request) {
     });
   }
 
-  console.log("Formatted Prompt:", formattedPrompt);
   const result = await generateText({
-    model: ollama("syaki-ai"),
+    model: google("gemini-2.0-flash"),
     messages: [
       ...convertToCoreMessages(initialMessages),
       { role: "user", content: formattedPrompt },
@@ -96,66 +160,3 @@ export async function POST(req: Request) {
     headers: { "Content-Type": "application/json" },
   });
 }
-
-// export async function POST(req: Request) {
-//   let messages, userContent;
-//   try {
-//     ({ messages, userContent } = await req.json());
-//   } catch (error) {
-//     console.error("Error parsing request JSON:", error);
-//     return new Response("Invalid JSON", { status: 400 });
-//   }
-
-//   const ollamaUrl = process.env.OLLAMA_URL;
-//   const initialMessages = messages.slice(0, -1);
-//   const currentMessage = messages[messages.length - 2];
-//   const ollama = createOllama({ baseURL: `${ollamaUrl}/api` });
-//   const currentMessageContent = normalizeText(
-//     currentMessage.content.replace("!tanya ", "")
-//   );
-
-//   const retrievedContent = await retrieveFromPinecone(currentMessageContent);
-
-//   const prompt = PromptTemplate.fromTemplate(`
-// It will be sent to student user via Whatsapp, so please use the following markdown formatting:
-//  - Use *bold* for important points.
-//  - Use _italics_ for emphasis.
-//  - Use \`\`\`monospace\`\`\` for code or technical terms.
-//  - Use \`inline code\` for short code snippets.
-//  - Use > Blockquotes for quoting text.
-//  - Use - bullet points for lists.
-//  - Use 1. numbered lists for ordered items.
-
-// if the user ask about his/her own data, you can use the user database to answer it, THIS IS LEGAL because the user database is his/her own data.
-
-//  Retrieved Context:
-//  {retrieved_content}
-
-//  User/Student Database:
-//  {user_database}
-
-//  User Input:
-//  {user_input}
-
-//  You have 240 tokens to answer this question, so please be concise and clear.
-//  Answer:
-//     `);
-//   const formattedPrompt = await prompt.format({
-//     retrieved_content: retrievedContent,
-//     user_input: currentMessageContent,
-//     user_database: readableUserData(userContent),
-//   });
-//   console.log("Formatted Prompt:", formattedPrompt);
-//   const result = await generateText({
-//     model: ollama("syaki-ai"),
-//     messages: [
-//       ...convertToCoreMessages(initialMessages),
-//       { role: "user", content: formattedPrompt },
-//     ],
-//     temperature: 0.2,
-//     maxTokens: 240,
-//   });
-//   return new Response(JSON.stringify({ text: result.text }), {
-//     headers: { "Content-Type": "application/json" },
-//   });
-// }
