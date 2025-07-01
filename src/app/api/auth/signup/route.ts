@@ -5,7 +5,6 @@ import { prisma } from "@/prisma";
 export async function POST(req: Request) {
   try {
     const { nama, email, password, no_whatsapp } = await req.json();
-    console.log("Request Body:", { nama, email, password, no_whatsapp });
 
     // Validate input
     if (!nama || !email || !password || !no_whatsapp) {
@@ -16,13 +15,26 @@ export async function POST(req: Request) {
     }
 
     // Check if the user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
+    const existingUser = await prisma.user.findFirst({
+      where: {email
+      }
     });
+
+    // Check if the WhatsApp number already exists
+    const existingWhatsAppUser = await prisma.user.findFirst({
+      where: { no_whatsapp }
+    });
+    
 
     if (existingUser) {
       return NextResponse.json(
-        { message: "User with this email already exists" },
+        { message: "Email already exists" },
+        { status: 400 }
+      );
+    }
+    if (existingWhatsAppUser) {
+      return NextResponse.json(
+        { message: "WhatsApp number already exists" },
         { status: 400 }
       );
     }
@@ -31,21 +43,37 @@ export async function POST(req: Request) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create the user
-    const newUser = await prisma.user.create({
-      data: {
-        nama,
-        email,
-        password: hashedPassword,
-        no_whatsapp,
-        role: "user", // Default role
-        is_notify: false, // Default notification setting
-      },
-    });
+    const { v4: uuidv4 } = await import('uuid');
+    try {
+      const user = await prisma.user.create({
+        data: {
+          id: uuidv4(),
+          nama,
+          email,
+          password: hashedPassword,
+          no_whatsapp,
+          role: "user", // Default role
+          is_notify: false, // Default notification setting
+        },
+      });
 
-    return NextResponse.json(
-      { message: "User created successfully", user: newUser },
-      { status: 201 }
-    );
+      // Remove sensitive or non-serializable fields before returning
+      const { password: _, ...userSafe } = user;
+
+      return NextResponse.json(
+        { message: "User created successfully", user: userSafe },
+        { status: 201 }
+      );
+    } catch (error) {
+      return NextResponse.json(
+        { message: error instanceof Error ? error.message : "Unknown error" },
+        { status: 500 }
+      );
+    }
+    // return NextResponse.json(
+    //   { message: "User created successfully", user: newUser },
+    //   { status: 201 }
+    // );
   } catch (error) {
     console.error("Error creating user:", error);
     return NextResponse.json(

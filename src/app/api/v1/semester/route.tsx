@@ -59,8 +59,10 @@ export async function POST(request: Request) {
       );
     }
 
+    const {v4: uuidv4} = await import('uuid');
     const newSemester = await prisma.semester.create({
       data: {
+        id: uuidv4(),
         nama: Number(nama),
         user: {
           connect: {
