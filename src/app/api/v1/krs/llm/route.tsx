@@ -73,12 +73,10 @@ Berdasarkan data jadwal kuliah yang diberikan, buatkan array JSON lengkap untuk 
     const jsonMatch = rawText.match(/(\[[\s\S]*\]|\{[\s\S]*\})/);
     const jsonString = jsonMatch ? jsonMatch[0] : rawText;
     krsData = JSON.parse(jsonString); // Parse the cleaned string
-    console.log("Parsed KRS Data:", krsData);
     if (!Array.isArray(krsData)) {
       throw new Error("Parsed data is not a valid array.");
     }
   } catch (e) {
-    console.error("Error parsing AI response:", e);
     return new Response(
       JSON.stringify({
         error: ["Failed to parse AI response as a valid JSON array"],
@@ -122,7 +120,6 @@ Berdasarkan data jadwal kuliah yang diberikan, buatkan array JSON lengkap untuk 
     );
     return new Response(JSON.stringify(processedKRS), { status: 201 });
   } catch (prismaError) {
-    console.error("Prisma Transaction Error:", prismaError);
     return new Response(
       JSON.stringify({ error: ["Failed to save data to database"] }),
       {
