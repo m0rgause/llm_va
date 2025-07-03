@@ -6,7 +6,6 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get("user_id") ?? null;
   const semester = searchParams.get("semester") ?? null;
-  console.log("User ID:", userId, "Semester ID:", semester);
 
   try {
     if (!userId) {
@@ -53,7 +52,6 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   let body = await request.json();
-  console.log("Request Body:", body);
 
   try {
     // validate request body

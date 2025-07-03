@@ -54,9 +54,7 @@ const KRSEdit: React.FC<KRSEditProps> = ({
     };
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/v1/krs/${krs.id}`,
-        {
+      const response = await fetch(`/api/v1/krs/${krs.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
