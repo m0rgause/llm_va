@@ -85,7 +85,7 @@ const KRSAddLLM: React.FC<KRSAddProps> = ({ onKRSCreated, onAlert }) => {
         <div className="relative w-full overflow-hidden rounded-lg shadow-lg pb-[56.25%]">
           <iframe
             className="absolute top-0 left-0 w-full h-full"
-            src="https://www.youtube.com/embed/dn5coQRtZao" // <-- GANTI DENGAN VIDEO ID YOUTUBE ANDA
+            src="https://www.youtube.com/embed/s4HS4dy7ff8" // <-- GANTI DENGAN VIDEO ID YOUTUBE ANDA
             title="YouTube video player"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
