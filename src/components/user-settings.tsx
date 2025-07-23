@@ -77,13 +77,13 @@ export default function UserSettings() {
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
               <div className="flex w-full gap-2 p-1 items-center cursor-pointer">
                 <GearIcon className="w-4 h-4" />
-                Settings
+                Pengaturan
               </div>
             </DropdownMenuItem>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader className="space-y-4">
-              <DialogTitle>Settings</DialogTitle>
+              <DialogTitle>Pengaturan</DialogTitle>
               <EditUsernameForm setOpen={setOpen} />
             </DialogHeader>
           </DialogContent>
@@ -96,7 +96,7 @@ export default function UserSettings() {
               }}
             >
               <ExitIcon className="w-4 h-4" />
-              Logout
+              Keluar
             </div>
           </DropdownMenuItem>
         </Dialog>

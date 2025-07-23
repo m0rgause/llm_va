@@ -89,7 +89,9 @@ export default function ChatBottombar({
             onKeyDown={handleKeyPress}
             onChange={handleInputChange}
             name="message"
-            placeholder={!isListening ? "Enter your prompt here" : "Listening"}
+            placeholder={
+              !isListening ? "Masukkan prompt Anda di sini" : "Mendengarkan"
+            }
             className="max-h-40 px-6 pt-6 border-0 shadow-none bg-accent rounded-lg text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed dark:bg-card"
           />
 

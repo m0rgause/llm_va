@@ -53,14 +53,14 @@ export default function Signin(props: Props) {
     switch (name) {
       case "email":
         if (!value) {
-          setErrors({ ...errors, email: "Email is required" });
+          setErrors({ ...errors, email: "Email harus diisi" });
         } else {
           setErrors({ ...errors, email: "" });
         }
         break;
       case "password":
         if (!value) {
-          setErrors({ ...errors, password: "Password is required" });
+          setErrors({ ...errors, password: "Password harus diisi" });
         } else {
           setErrors({ ...errors, password: "" });
         }
@@ -123,7 +123,7 @@ export default function Signin(props: Props) {
           width={100}
           height={100}
         />
-        <h1 className="text-2xl font-semibold  text-center">Loading...</h1>
+        <h1 className="text-2xl font-semibold  text-center">Memuat...</h1>
       </div>
     </div>
   ) : (
@@ -162,7 +162,7 @@ export default function Signin(props: Props) {
                 "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-[#002D70] focus:ring-opacity-50 focus:border-[#002D70] sm:text-sm " +
                 (errors.email ? " border-red-500" : "")
               }
-              placeholder="eg@example.com"
+              placeholder="contoh@email.com"
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -193,15 +193,15 @@ export default function Signin(props: Props) {
             type="submit"
             className="w-full py-2 px-4 bg-[#002D70] text-white rounded-md hover:bg-[#001A4D] focus:outline-none focus:ring focus:ring-[#002D70] focus:ring-opacity-50 focus:border-[#002D70]"
           >
-            Login
+            Masuk
           </button>
           <p className="text-sm text-center text-gray-600">
-            Don&apos;t have an account?{" "}
+            Belum punya akun?{" "}
             <a
               href="/auth/signup"
               className=" font-semibold hover:underline text-blue-500"
             >
-              Sign Up
+              Daftar
             </a>
           </p>
         </form>

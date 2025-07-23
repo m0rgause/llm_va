@@ -113,7 +113,7 @@ export default function ChatTopbar({
             ))
           ) : (
             <Button variant="ghost" disabled className=" w-full">
-              No models available
+              Tidak ada model tersedia
             </Button>
           )}
         </PopoverContent>

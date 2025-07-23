@@ -123,7 +123,7 @@ const KRSAddLLM: React.FC<KRSAddProps> = ({ onKRSCreated, onAlert }) => {
           >
             <span className="w-full relative px-5 py-2.5 transition-all ease-in duration-75 bg-accent dark:bg-card rounded-md group-hover:bg-transparent group-hover:dark:bg-transparent">
               {processing ? (
-                <span className="animate-spin">Processing...</span>
+                <span className="animate-spin">Sedang diproses...</span>
               ) : (
                 "Proses KRS"
               )}

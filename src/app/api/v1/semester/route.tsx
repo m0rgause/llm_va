@@ -32,14 +32,14 @@ export async function POST(request: Request) {
   try {
     if (!nama) {
       return NextResponse.json(
-        { error: "Semester name is required" },
+        { error: "Nama semester diperlukan" },
         { status: 400 }
       );
     }
 
     if (!userId) {
       return NextResponse.json(
-        { error: "User ID is required" },
+        { error: "ID Pengguna diperlukan" },
         { status: 400 }
       );
     }
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const {v4: uuidv4} = await import('uuid');
+    const { v4: uuidv4 } = await import("uuid");
     const newSemester = await prisma.semester.create({
       data: {
         id: uuidv4(),

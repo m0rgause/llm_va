@@ -10,14 +10,14 @@ export async function GET(request: Request) {
   try {
     if (!userId) {
       return NextResponse.json(
-        { error: "User ID is required" },
+        { error: "ID Pengguna diperlukan" },
         { status: 400 }
       );
     }
 
     if (!semester) {
       return NextResponse.json(
-        { error: "Semester Name is required" },
+        { error: "Nama Semester diperlukan" },
         { status: 400 }
       );
     }
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
 
     for (const field of requiredFields) {
       if (!body[field]) {
-        error.push(`${field.replace("_", " ")} is required`);
+        error.push(`${field.replace("_", " ")} diperlukan`);
       }
     }
 

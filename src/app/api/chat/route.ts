@@ -29,6 +29,7 @@ export async function POST(req: Request) {
   const currentMessage = messages[messages.length - 1];
 
   const currentMessageContent = normalizeText(currentMessage.content);
+  console.log("Current message:", currentMessageContent);
 
   // Intent detection
   const intent = await intentDetection(currentMessageContent, google);
@@ -109,9 +110,7 @@ export async function POST(req: Request) {
       user_data: user_data_str,
     });
   } else {
-    const retrievedContent = await retrieveFromPinecone(
-      normalizeText(currentMessageContent)
-    );
+    const retrievedContent = await retrieveFromPinecone(currentMessageContent);
     const promptTemplate = PromptTemplate.fromTemplate(`
   You are a helpful, friendly, and context-aware virtual assistant for Universitas SyaKi. Your role is to assist users by answering questions related to academic matters, administrative procedures, and campus activities, using the retrieved context and student/user data provided to you.
 

@@ -40,39 +40,39 @@ export default function Signup() {
     switch (name) {
       case "nama":
         if (!value) {
-          setErrors({ ...errors, nama: "Name is required" });
+          setErrors({ ...errors, nama: "Nama harus diisi" });
         } else {
           setErrors({ ...errors, nama: "" });
         }
         break;
       case "email":
         if (!value) {
-          setErrors({ ...errors, email: "Email is required" });
+          setErrors({ ...errors, email: "Email harus diisi" });
         } else {
           setErrors({ ...errors, email: "" });
         }
         break;
       case "password":
         if (!value) {
-          setErrors({ ...errors, password: "Password is required" });
+          setErrors({ ...errors, password: "Password harus diisi" });
         } else {
           setErrors({ ...errors, password: "" });
         }
         break;
       case "confirmPassword":
         if (value !== input.password) {
-          setErrors({ ...errors, confirmPassword: "Passwords do not match" });
+          setErrors({ ...errors, confirmPassword: "Password tidak cocok" });
         } else {
           setErrors({ ...errors, confirmPassword: "" });
         }
         break;
       case "no_whatsapp":
         if (!value) {
-          setErrors({ ...errors, no_whatsapp: "WhatsApp number is required" });
+          setErrors({ ...errors, no_whatsapp: "Nomor WhatsApp harus diisi" });
         } else if (!/^\d{10,15}$/.test(value)) {
           setErrors({
             ...errors,
-            no_whatsapp: "WhatsApp number must be 10-15 digits",
+            no_whatsapp: "Nomor WhatsApp harus 10-15 digit",
           });
         } else {
           setErrors({ ...errors, no_whatsapp: "" });
@@ -93,12 +93,12 @@ export default function Signup() {
       !input.confirmPassword ||
       !input.no_whatsapp
     ) {
-      setAlert({ message: "Please fill all fields", type: "error" });
+      setAlert({ message: "Harap isi semua field", type: "error" });
       return;
     }
 
     if (input.password !== input.confirmPassword) {
-      setAlert({ message: "Passwords do not match", type: "error" });
+      setAlert({ message: "Password tidak cocok", type: "error" });
       return;
     }
 
@@ -127,7 +127,7 @@ export default function Signup() {
       }
 
       setAlert({
-        message: "Account created successfully. Redirecting...",
+        message: "Akun berhasil dibuat. Mengalihkan...",
         type: "success",
       });
 
@@ -161,7 +161,7 @@ export default function Signup() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="nama" className="block text-sm font-medium">
-                Name
+                Nama
               </label>
               <input
                 type="text"
@@ -174,7 +174,7 @@ export default function Signup() {
                   "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-[#002D70] focus:ring-opacity-50 focus:border-[#002D70] sm:text-sm " +
                   (errors.nama ? " border-red-500" : "")
                 }
-                placeholder="Your Name"
+                placeholder="Nama Anda"
               />
               {errors.nama && (
                 <p className="text-red-500 text-sm mt-1">{errors.nama}</p>
@@ -195,7 +195,7 @@ export default function Signup() {
                   "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-[#002D70] focus:ring-opacity-50 focus:border-[#002D70] sm:text-sm " +
                   (errors.email ? " border-red-500" : "")
                 }
-                placeholder="eg@example.com"
+                placeholder="contoh@email.com"
               />
               {errors.email && (
                 <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -227,7 +227,7 @@ export default function Signup() {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium"
               >
-                Confirm Password
+                Konfirmasi Password
               </label>
               <input
                 type="password"
@@ -253,7 +253,7 @@ export default function Signup() {
                 htmlFor="no_whatsapp"
                 className="block text-sm font-medium"
               >
-                WhatsApp Number
+                Nomor WhatsApp
               </label>
               <input
                 type="text"
@@ -266,7 +266,7 @@ export default function Signup() {
                   "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-[#002D70] focus:ring-opacity-50 focus:border-[#002D70] sm:text-sm " +
                   (errors.no_whatsapp ? " border-red-500" : "")
                 }
-                placeholder="e.g., 081234567890"
+                placeholder="contoh: 081234567890"
               />
               {errors.no_whatsapp && (
                 <p className="text-red-500 text-sm mt-1">
@@ -279,15 +279,15 @@ export default function Signup() {
             type="submit"
             className="w-full py-2 px-4 bg-[#002D70] text-white rounded-md hover:bg-[#001A4D] focus:outline-none focus:ring focus:ring-[#002D70] focus:ring-opacity-50 focus:border-[#002D70]"
           >
-            Sign Up
+            Daftar
           </button>
           <p className="text-sm text-center text-gray-600">
-            Already have an account?{" "}
+            Sudah punya akun?{" "}
             <a
               href="/auth/signin"
               className="font-semibold hover:underline text-blue-500"
             >
-              Sign In
+              Masuk
             </a>
           </p>
         </form>

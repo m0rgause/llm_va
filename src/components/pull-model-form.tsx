@@ -22,7 +22,7 @@ import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   name: z.string().min(1, {
-    message: "Please select a model to pull",
+    message: "Silakan pilih model untuk ditarik",
   }),
 });
 
@@ -65,21 +65,21 @@ export default function PullModelForm() {
       });
 
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error("Respon jaringan tidak baik");
       }
 
       if (!response.body) {
-        throw new Error("Something went wrong");
+        throw new Error("Terjadi kesalahan");
       }
 
       await processStream(response.body, throttledSetProgress, lastStatus);
 
-      toast.success("Model pulled successfully");
+      toast.success("Model berhasil ditarik");
       router.refresh();
     } catch (error) {
       toast.error(
-        `Error: ${
-          error instanceof Error ? error.message : "Failed to pull model"
+        `Kesalahan: ${
+          error instanceof Error ? error.message : "Gagal menarik model"
         }`
       );
     } finally {
@@ -125,7 +125,7 @@ export default function PullModelForm() {
             lastStatus = responseJson.status;
           }
         } catch (error) {
-          throw new Error("Error parsing JSON");
+          throw new Error("Kesalahan parsing JSON");
         }
       }
     }
@@ -143,7 +143,7 @@ export default function PullModelForm() {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Model name</FormLabel>
+              <FormLabel>Nama Model</FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -153,15 +153,15 @@ export default function PullModelForm() {
                 />
               </FormControl>
               <p className="text-xs pt-1">
-                Check the{" "}
+                Periksa{" "}
                 <a
                   href="https://ollama.com/library"
                   target="_blank"
                   className="text-blue-500 underline"
                 >
-                  library
+                  perpustakaan
                 </a>{" "}
-                for a list of available models.
+                untuk daftar model yang tersedia.
               </p>
               <FormMessage />
               <div className="space-y-2 w-full">
@@ -174,12 +174,12 @@ export default function PullModelForm() {
                     <div className="flex items-center gap-2">
                       <Loader2Icon className="animate-spin w-4 h-4" />
                       <span>
-                        Pulling {downloadingModel}...{" "}
+                        Menarik {downloadingModel}...{" "}
                         {downloadProgress.toFixed(0)}%
                       </span>
                     </div>
                   ) : (
-                    "Pull model"
+                    "Tarik Model"
                   )}
                 </Button>
                 <p className="text-xs text-center">

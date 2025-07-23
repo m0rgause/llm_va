@@ -63,7 +63,7 @@ const KRSAdd: React.FC<KRSAddProps> = ({ onKRSCreated, onAlert }) => {
     }
 
     onKRSCreated(result);
-    onAlert({ message: "KRS created successfully", type: "success" });
+    onAlert({ message: "KRS telah dibuat", type: "success" });
     setTimeout(() => {
       onAlert({ message: "", type: "" });
     }, 5000);
@@ -77,7 +77,7 @@ const KRSAdd: React.FC<KRSAddProps> = ({ onKRSCreated, onAlert }) => {
         onSubmit={handleSubmit}
         className="max-w-md mx-auto"
         id="krs-form"
-        aria-describedby="Add KRS"
+        aria-describedby="Tambah KRS"
       >
         <div className="relative z-0 w-full mb-5 group">
           <input

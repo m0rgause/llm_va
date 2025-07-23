@@ -16,9 +16,9 @@ export async function POST(request: Request) {
   } = await request.json();
 
   const error: string[] = [];
-  if (!jadwal_kuliah) error.push("Jadwal kuliah is required");
-  if (!user_id) error.push("User id is required");
-  if (!semester) error.push("Semester is required");
+  if (!jadwal_kuliah) error.push("Jadwal kuliah diperlukan");
+  if (!user_id) error.push("ID pengguna diperlukan");
+  if (!semester) error.push("Semester diperlukan");
 
   if (error.length > 0) {
     return new Response(JSON.stringify({ error }), { status: 400 });

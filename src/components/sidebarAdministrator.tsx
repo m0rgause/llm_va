@@ -122,7 +122,7 @@ export function SidebarAdministrator({
             >
               <div className="flex gap-3 items-center truncate">
                 <div className="flex flex-col">
-                  <span className="text-sm font-normal py-5">Documents</span>
+                  <span className="text-sm font-normal py-5">Dokumen</span>
                 </div>
               </div>
             </Link>
@@ -143,7 +143,7 @@ export function SidebarAdministrator({
             >
               <div className="flex gap-3 items-center truncate">
                 <div className="flex flex-col">
-                  <span className="text-sm font-normal py-5">Users</span>
+                  <span className="text-sm font-normal py-5">Pengguna</span>
                 </div>
               </div>
             </Link>
