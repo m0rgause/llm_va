@@ -54,16 +54,13 @@ const KRSEdit: React.FC<KRSEditProps> = ({
     };
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/v1/krs/${krs.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updatedKRS),
-        }
-      );
+      const response = await fetch(`/api/v1/krs/${krs.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedKRS),
+      });
       if (!response.ok) {
         const errorData = await response.json();
         onAlert({
@@ -255,7 +252,7 @@ const KRSEdit: React.FC<KRSEditProps> = ({
           type="submit"
           className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
         >
-          Simpan KRS
+          Perbarui KRS
         </button>
       </form>
     </div>

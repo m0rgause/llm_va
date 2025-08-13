@@ -40,6 +40,7 @@ async function retrieveFromPinecone(query: string) {
   }
   const endTime = Date.now();
   console.log(`Pinecone retrieval finished in ${endTime - startTime}ms`);
+  console.log("Retrieved content:", res);
   return res;
 }
 

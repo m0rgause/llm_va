@@ -41,7 +41,7 @@ const SemesterForm: React.FC<SemesterFormProps> = ({
   }, [session?.user.id]);
 
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return <div>Memuat...</div>;
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -56,7 +56,7 @@ const SemesterForm: React.FC<SemesterFormProps> = ({
 
     // Validate input
     if (!data.nama) {
-      onAlert({ message: "Nama semester is required", type: "error" });
+      onAlert({ message: "Nama semester harus diisi", type: "error" });
       return;
     }
 
@@ -78,7 +78,7 @@ const SemesterForm: React.FC<SemesterFormProps> = ({
     const newSemester = await response.json();
     onSemesterCreated(newSemester);
 
-    onAlert({ message: "Semester created successfully", type: "success" });
+    onAlert({ message: "Semester berhasil dibuat", type: "success" });
     setTimeout(() => {
       onAlert({ message: "", type: "" });
     }, 5000);

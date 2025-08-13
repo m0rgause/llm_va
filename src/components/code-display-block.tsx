@@ -43,7 +43,7 @@ export default function CodeDisplayBlock({ code }: ButtonCodeblockProps) {
     navigator.clipboard.writeText(trimmedCode);
     isCopiedRef.current = true;
     setIsCopied(true);
-    toast.success("Code copied to clipboard!");
+    toast.success("Kode berhasil disalin ke clipboard!");
 
     setTimeout(() => {
       isCopiedRef.current = false;

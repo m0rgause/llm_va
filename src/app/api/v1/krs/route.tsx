@@ -6,19 +6,18 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get("user_id") ?? null;
   const semester = searchParams.get("semester") ?? null;
-  console.log("User ID:", userId, "Semester ID:", semester);
 
   try {
     if (!userId) {
       return NextResponse.json(
-        { error: "User ID is required" },
+        { error: "ID Pengguna diperlukan" },
         { status: 400 }
       );
     }
 
     if (!semester) {
       return NextResponse.json(
-        { error: "Semester Name is required" },
+        { error: "Nama Semester diperlukan" },
         { status: 400 }
       );
     }
@@ -53,7 +52,6 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   let body = await request.json();
-  console.log("Request Body:", body);
 
   try {
     // validate request body
@@ -74,7 +72,7 @@ export async function POST(request: Request) {
 
     for (const field of requiredFields) {
       if (!body[field]) {
-        error.push(`${field.replace("_", " ")} is required`);
+        error.push(`${field.replace("_", " ")} diperlukan`);
       }
     }
 
@@ -110,20 +108,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error }, { status: 400 });
     }
 
-    //conver waktu_mulai and waktu_selesai to asia/jakarta timezone
-    // const waktuMulai = new Date(
-    //   new Date(body.waktu_mulai).toLocaleString("en-US", {
-    //     timeZone: "Asia/Jakarta",
-    //   })
-    // ).toISOString();
-    // const waktuSelesai = new Date(
-    //   new Date(body.waktu_selesai).toLocaleString("en-US", {
-    //     timeZone: "Asia/Jakarta",
-    //   })
-    // ).toISOString();
-
+    const { v4: uuidv4 } = await import("uuid");
     const krs = await prisma.kelas.create({
       data: {
+        id: uuidv4(),
         semester_id: existingSemester!.id,
         hari: body.hari,
         waktu_mulai: body.waktu_mulai,

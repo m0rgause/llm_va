@@ -93,24 +93,47 @@ function ChatMessage({ message, isLast, isLoading, reload }: ChatMessageProps) {
     );
 
   const renderContent = () => {
-    return contentParts.map((part, index) =>
-      index % 2 === 0 ? (
-        <Markdown key={index} remarkPlugins={[remarkGfm]}>
+    return contentParts.map((part, index) => {
+      return index % 2 === 0 ? (
+        <Markdown
+          key={index}
+          remarkPlugins={[remarkGfm]}
+          components={{
+            ul: ({ children }) => (
+              <ul className="my-1 space-y-0 pl-6 list-disc">{children}</ul>
+            ),
+            ol: ({ children }) => (
+              <ol className="my-1 space-y-0 pl-6 list-decimal">{children}</ol>
+            ),
+            li: ({ children }) => (
+              <li className="my-0">
+                {typeof children === "string"
+                  ? children.replace(/\n|\r\n|\r/g, " ").trim()
+                  : React.Children.map(children, (child) =>
+                      typeof child === "string"
+                        ? child.replace(/\n|\r\n|\r/g, " ").trim()
+                        : child
+                    )}
+              </li>
+            ),
+            p: ({ children }) => <p className="my-1 last:mb-0">{children}</p>,
+          }}
+        >
           {part}
         </Markdown>
       ) : (
         <pre className="whitespace-pre-wrap" key={index}>
           <CodeDisplayBlock code={part} />
         </pre>
-      )
-    );
+      );
+    });
   };
 
   const renderActionButtons = () =>
     message.role === "assistant" && (
       <div className="pt-2 flex gap-1 items-center text-muted-foreground">
         {!isLoading && (
-          <ButtonWithTooltip side="bottom" toolTipText="Copy">
+          <ButtonWithTooltip side="bottom" toolTipText="Salin">
             <Button
               onClick={handleCopy}
               variant="ghost"
@@ -126,7 +149,7 @@ function ChatMessage({ message, isLast, isLoading, reload }: ChatMessageProps) {
           </ButtonWithTooltip>
         )}
         {!isLoading && isLast && (
-          <ButtonWithTooltip side="bottom" toolTipText="Regenerate">
+          <ButtonWithTooltip side="bottom" toolTipText="Buat Ulang">
             <Button
               variant="ghost"
               size="icon"
@@ -141,15 +164,12 @@ function ChatMessage({ message, isLast, isLoading, reload }: ChatMessageProps) {
     );
 
   return (
-    <motion.div
-      {...MOTION_CONFIG}
-      className="flex flex-col gap-2 whitespace-pre-wrap"
-    >
+    <motion.div {...MOTION_CONFIG} className="flex flex-col">
       <ChatBubble variant={message.role === "user" ? "sent" : "received"}>
         <ChatBubbleMessage>
           {renderThinkingProcess()}
           {renderAttachments()}
-          <article className="prose dark:prose-invert prose-sm max-w-none text-[18px]">
+          <article className="prose dark:prose-invert prose-sm max-w-none  [&_ul]:my-2 [&_ol]:my-2 [&_li]:my-0">
             {renderContent()}
           </article>
           {renderActionButtons()}

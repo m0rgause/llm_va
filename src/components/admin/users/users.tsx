@@ -26,7 +26,7 @@ export default function Users() {
           },
         });
         if (!response.ok) {
-          throw new Error("Failed to fetch users");
+          throw new Error("Gagal mengambil pengguna");
         }
         const data = await response.json();
         setUsers(data);
@@ -60,7 +60,7 @@ export default function Users() {
   return (
     <div className="min-h-screen ">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">Users</h1>
+        <h1 className="text-2xl font-semibold">Pengguna</h1>
         <nav className="flex" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
             <li className="inline-flex items-center">
@@ -92,7 +92,7 @@ export default function Users() {
                   href="#"
                   className="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white"
                 >
-                  Users
+                  Pengguna
                 </a>
               </div>
             </li>
@@ -107,7 +107,7 @@ export default function Users() {
       )}
       <div className="bg-accent dark:bg-card p-4 rounded shadow-lg mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">List Users</h2>
+          <h2 className="text-lg font-semibold">Daftar Pengguna</h2>
           <div className="flex items-center space-x-2">
             <input
               type="text"
@@ -174,7 +174,7 @@ export default function Users() {
               disabled={currentPage === 1}
               className="px-3 py-1 rounded border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 disabled:opacity-50"
             >
-              Prev
+              Sebelumnya
             </button>
             {Array.from({ length: totalPages }, (_, i) => (
               <button
@@ -194,7 +194,7 @@ export default function Users() {
               disabled={currentPage === totalPages}
               className="px-3 py-1 rounded border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 disabled:opacity-50"
             >
-              Next
+              Selanjutnya
             </button>
           </div>
         )}

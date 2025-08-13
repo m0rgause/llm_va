@@ -63,7 +63,7 @@ export function Sidebar({
           },
         });
         if (!response.ok) {
-          throw new Error("Failed to fetch semesters");
+          throw new Error("Gagal mengambil semester");
         }
         const data = await response.json();
         setSemesters(data);
@@ -159,7 +159,7 @@ export function Sidebar({
         </div>
 
         <div className="flex flex-col pt-10 gap-2">
-          <p className="pl-4 text-xs font-extrabold">History Chat</p>
+          <p className="pl-4 text-xs font-extrabold">Riwayat Chat</p>
           <Suspense fallback>
             {chats ? (
               Object.entries(chats)
@@ -209,18 +209,18 @@ export function Sidebar({
                               onClick={(e) => e.stopPropagation()}
                             >
                               <Trash2 className="shrink-0 w-4 h-4" />
-                              Delete chat
+                              Hapus chat
                             </Button>
                           </DialogTrigger>
                           <DialogContent>
                             <DialogHeader className="space-y-4">
-                              <DialogTitle>Delete chat?</DialogTitle>
+                              <DialogTitle>Hapus chat?</DialogTitle>
                               <DialogDescription>
-                                Are you sure you want to delete this chat? This
-                                action cannot be undone.
+                                Apakah Anda yakin ingin menghapus chat ini?
+                                Tindakan ini tidak dapat dibatalkan.
                               </DialogDescription>
                               <div className="flex justify-end gap-2">
-                                <Button variant="outline">Cancel</Button>
+                                <Button variant="outline">Batal</Button>
                                 <Button
                                   variant="destructive"
                                   onClick={(e) => {
@@ -229,7 +229,7 @@ export function Sidebar({
                                     router.push("/");
                                   }}
                                 >
-                                  Delete
+                                  Hapus
                                 </Button>
                               </div>
                             </DialogHeader>
@@ -242,7 +242,7 @@ export function Sidebar({
             ) : (
               <div className="flex justify-center items-center h-10">
                 <span className="text-sm text-muted-foreground">
-                  No chats available
+                  Tidak ada chat tersedia
                 </span>
               </div>
             )}

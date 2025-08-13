@@ -15,6 +15,7 @@ import KRSAdd from "./krs-add";
 import Alert from "../ui/alert";
 import { formatTime } from "@/lib/utils";
 import KRSEdit from "./krs-edit";
+import KRSAddLLM from "./krs-add-llm";
 
 interface KRS {
   id?: string;
@@ -34,6 +35,7 @@ export default function KRS() {
   const { data: session, status } = useSession();
   const [krs, setKrs] = useState<KRS[]>([]);
   const [dialogAddOpen, setDialogAddOpen] = useState(false);
+  const [dialogAddByLLMOpen, setDialogAddByLLMOpen] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [alert, setAlert] = useState({
     message: "",
@@ -83,6 +85,38 @@ export default function KRS() {
     };
     setKrs((prevKrs) => [...prevKrs, formattedKRS]);
     setDialogAddOpen(false);
+  };
+
+  const handleAddByLLM = (newKRS: KRS[]) => {
+    const formattedKRS = newKRS.map((item) => ({
+      ...item,
+      waktu_mulai: formatTime(item.waktu_mulai),
+      waktu_selesai: formatTime(item.waktu_selesai),
+    }));
+
+    setKrs((prevKrs) => {
+      // Upsert: replace if id exists, otherwise add
+      const krsMap = new Map(prevKrs.map((item) => [item.id, item]));
+      formattedKRS.forEach((item) => {
+        if (item.id && krsMap.has(item.id)) {
+          krsMap.set(item.id, item);
+        } else {
+          // If no id or not found, add as new
+          krsMap.set(item.id || Math.random().toString(), item);
+        }
+      });
+      return Array.from(krsMap.values());
+    });
+
+    setDialogAddByLLMOpen(false);
+    setAlert({
+      message: "Berhasil menambahkan mata kuliah",
+      type: "success",
+    });
+    setTimeout(() => {
+      setAlert({ message: "", type: "" });
+    }, 3000);
+    router.refresh();
   };
 
   const handleEditClick = (itemId: string) => {
@@ -204,7 +238,7 @@ export default function KRS() {
       )}
 
       <div className="bg-accent dark:bg-card p-4 rounded shadow-lg mb-6">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-start items-center mb-4">
           <Dialog open={dialogAddOpen} onOpenChange={setDialogAddOpen}>
             <DialogTrigger asChild>
               <button
@@ -212,7 +246,7 @@ export default function KRS() {
                 type="button"
               >
                 <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-accent dark:bg-card rounded-md group-hover:bg-transparent group-hover:dark:bg-transparent">
-                  Tambah Mata Kuliah
+                  Tambah Mata Kuliah Manual
                 </span>
               </button>
             </DialogTrigger>
@@ -224,6 +258,33 @@ export default function KRS() {
               >
                 <DialogTitle>Tambah Mata Kuliah</DialogTitle>
                 <KRSAdd onKRSCreated={handleAddKRS} onAlert={setAlert} />
+              </DialogContent>
+            </DialogPortal>
+          </Dialog>
+          <Dialog
+            open={dialogAddByLLMOpen}
+            onOpenChange={setDialogAddByLLMOpen}
+          >
+            <DialogTrigger asChild>
+              <button
+                className={`relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-pink-500 group-hover:from-purple-600 group-hover:to-pink-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800`}
+                type="button"
+                onClick={() => setDialogAddByLLMOpen(true)}
+              >
+                <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-accent dark:bg-card rounded-md group-hover:bg-transparent group-hover:dark:bg-transparent">
+                  Tambah Mata Kuliah dengan LLM
+                </span>
+              </button>
+            </DialogTrigger>
+            <DialogPortal>
+              <DialogOverlay className="fixed inset-0 bg-black/40" />
+              {/* MODIFIKASI DI SINI */}
+              <DialogContent
+                className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-2xl p-6 bg-white dark:bg-card rounded-lg shadow-xl space-y-4 max-h-[85vh] overflow-y-auto"
+                aria-describedby="dialog-description"
+              >
+                <DialogTitle>Tambah Mata Kuliah dengan LLM</DialogTitle>
+                <KRSAddLLM onAlert={setAlert} onKRSCreated={handleAddByLLM} />
               </DialogContent>
             </DialogPortal>
           </Dialog>
